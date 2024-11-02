@@ -626,7 +626,7 @@ return {
           type = 'firefox',
           request = 'launch',
           reAttach = true,
-          url = 'http://localhost:4200', -- Write the actual URL of your project.
+          url = 'http://localhost:5173', -- Write the actual URL of your project.
           webRoot = '${workspaceFolder}',
           firefoxExecutable = '/usr/bin/firefox'
         }

@@ -267,6 +267,7 @@ return {
           package_pending = require("base.utils").get_icon("MasonPending"),
         },
       },
+      opts = { ensure_installed = { "prettier" } },
     }
   },
 
@@ -275,65 +276,106 @@ return {
   --  We use this plugin in ../base/utils/lsp.lua
   "b0o/SchemaStore.nvim",
 
-  -- none-ls-autoload.nvim [mason package loader]
-  -- https://github.com/zeioth/mason-none-ls.nvim
-  -- This plugin auto starts the packages installed by Mason
-  -- every time Neovim trigger the event FileType ().
-  -- By default it will use none-ls builtin sources.
-  -- But you can add external sources if a mason package has no builtin support.
-  {
-    "zeioth/none-ls-autoload.nvim",
-    event = "User BaseFile",
-    dependencies = {
-      "williamboman/mason.nvim",
-      "zeioth/none-ls-external-sources.nvim"
-    },
-    opts = {
-      -- Here you can add support for sources not oficially suppored by none-ls.
-      external_sources = {
-        -- diagnostics
-        'none-ls-external-sources.diagnostics.cpplint',
-        'none-ls-external-sources.diagnostics.eslint',
-        'none-ls-external-sources.diagnostics.eslint_d',
-        'none-ls-external-sources.diagnostics.flake8',
-        'none-ls-external-sources.diagnostics.luacheck',
-        'none-ls-external-sources.diagnostics.psalm',
-        'none-ls-external-sources.diagnostics.shellcheck',
-        'none-ls-external-sources.diagnostics.yamllint',
-
-        -- formatting
-        'none-ls-external-sources.formatting.autopep8',
-        'none-ls-external-sources.formatting.beautysh',
-        'none-ls-external-sources.formatting.easy-coding-standard',
-        'none-ls-external-sources.formatting.eslint',
-        'none-ls-external-sources.formatting.eslint_d',
-        'none-ls-external-sources.formatting.jq',
-        'none-ls-external-sources.formatting.latexindent',
-        'none-ls-external-sources.formatting.reformat_gherkin',
-        'none-ls-external-sources.formatting.rustfmt',
-        'none-ls-external-sources.formatting.standardrb',
-        'none-ls-external-sources.formatting.yq',
-      },
-    },
-  },
-
   -- none-ls [lsp code formatting]
   -- https://github.com/nvimtools/none-ls.nvim
   {
     "nvimtools/none-ls.nvim",
     event = "User BaseFile",
     opts = function()
-      local builtin_sources = require("null-ls").builtins
+      local null_ls = require("null-ls")
+      local builtin_sources = null_ls.builtins
 
-      -- You can customize your 'builtin sources' and 'external sources' here.
-      builtin_sources.formatting.shfmt.with({
-        command = "shfmt",
-        args = { "-i", "2", "-filename", "$FILENAME" },
-      })
+      -- Create formatting group for autoformatting on save
+      local group = vim.api.nvim_create_augroup("lsp_format_on_save", { clear = false })
+      local event = "BufWritePre"
+      local async = event == "BufWritePost"
 
-      -- Attach the user lsp mappings to every none-ls client.
-      return { on_attach = utils_lsp.apply_user_lsp_mappings }
-    end
+      local sources = {
+        builtin_sources.formatting.prettier.with({
+          filetypes = {
+            "javascript",
+            "javascriptreact",
+            "typescript",
+            "typescriptreact",
+            "vue",
+            "css",
+            "scss",
+            "less",
+            "html",
+            "json",
+            "yaml",
+            "markdown",
+            "graphql"
+          },
+        }),
+
+        -- Your existing shfmt configuration
+        builtin_sources.formatting.shfmt.with({
+          command = "shfmt",
+          args = { "-i", "2", "-filename", "$FILENAME" },
+        })
+      }
+
+      return {
+        sources = sources,
+        on_attach = function(client, bufnr)
+          utils_lsp.apply_user_lsp_mappings(client, bufnr)
+
+          -- Format on save
+          if client.supports_method("textDocument/formatting") then
+            vim.api.nvim_clear_autocmds({ buffer = bufnr, group = group })
+            vim.api.nvim_create_autocmd(event, {
+              buffer = bufnr,
+              group = group,
+              callback = function()
+                vim.lsp.buf.format({ bufnr = bufnr, async = async })
+              end,
+              desc = "[lsp] format on save",
+            })
+          end
+        end
+      }
+    end,
+    dependencies = {
+      "mason.nvim"
+    }
+  },
+  {
+    "MunifTanjim/prettier.nvim",
+    event = "User BaseFile",
+    opts = {
+      bin = 'prettier', -- or 'prettierd' for faster formatting
+      filetypes = {
+        "css",
+        "graphql",
+        "html",
+        "javascript",
+        "javascriptreact",
+        "json",
+        "less",
+        "markdown",
+        "scss",
+        "typescript",
+        "typescriptreact",
+        "yaml",
+      },
+      cli_options = {
+        arrow_parens = "always",
+        bracket_spacing = true,
+        bracket_same_line = false,
+        embedded_language_formatting = "auto",
+        end_of_line = "lf",
+        print_width = 80,
+        semi = true,
+        single_quote = false,
+        tab_width = 2,
+        trailing_comma = "es5",
+        use_tabs = false,
+      },
+    },
+    dependencies = {
+      "nvimtools/none-ls.nvim",
+    },
   },
 
   --  garbage-day.nvim [lsp garbage collector]
@@ -381,7 +423,7 @@ return {
         { path = "nui.nvim", mods = { "nui" } },
         { path = "nvim-ufo", mods = { "ufo" } },
         { path = "promise-async", mods = { "promise-async" } },
-        { path = "nvim-neoclip.lua", mods = { "neoclip", "telescope" } },
+        -- { path = "nvim-neoclip.lua", mods = { "neoclip", "telescope" } },
         { path = "zen-mode.nvim", mods = { "zen-mode" } },
         { path = "vim-suda", mods = { "suda" } }, -- has vimscript
         { path = "vim-matchup", mods = { "matchup", "match-up", "treesitter-matchup" } }, -- has vimscript

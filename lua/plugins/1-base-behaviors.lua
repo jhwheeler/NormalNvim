@@ -2,7 +2,6 @@
 -- Plugins that add new behaviors.
 
 --    Sections:
---       -> yazi file browser      [yazi]
 --       -> project.nvim           [project search + auto cd]
 --       -> trim.nvim              [auto trim spaces]
 --       -> stickybuf.nvim         [lock special buffers]
@@ -29,19 +28,6 @@
 local is_android = vim.fn.isdirectory('/data') == 1 -- true if on android
 
 return {
-
-  -- [yazi] file browser
-  -- https://github.com/mikavilpas/yazi.nvim
-  -- Make sure you have yazi installed on your system!
-  {
-    "mikavilpas/yazi.nvim",
-    event = "User BaseDefered",
-    cmd = { "Yazi", "Yazi cwd", "Yazi toggle" },
-    opts = {
-        open_for_directories = true,
-        floating_window_scaling_factor = (is_android and 1.0) or 0.71
-    },
-  },
 
   -- project.nvim [project search + auto cd]
   -- https://github.com/ahmedkhalf/project.nvim

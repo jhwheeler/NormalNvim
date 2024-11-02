@@ -126,17 +126,6 @@ maps.n["<Tab>"] = {
 
 -- clipboard ---------------------------------------------------------------
 
--- BUG: We disable these mappings on termux by default because <C-y>
---      is the keycode for scrolling, and remapping it would break it.
-if not is_android then
-  -- only useful when the option clipboard is commented on ./1-options.lua
-  maps.n["<C-y>"] = { '"+y<esc>', desc = "Copy to cliboard" }
-  maps.x["<C-y>"] = { '"+y<esc>', desc = "Copy to cliboard" }
-  maps.n["<C-d>"] = { '"+y<esc>dd', desc = "Copy to clipboard and delete line" }
-  maps.x["<C-d>"] = { '"+y<esc>dd', desc = "Copy to clipboard and delete line" }
-  maps.n["<C-p>"] = { '"+p<esc>', desc = "Paste from clipboard" }
-end
-
 -- Make 'c' key not copy to clipboard when changing a character.
 maps.n["c"] = { '"_c', desc = "Change without yanking" }
 maps.n["C"] = { '"_C', desc = "Change without yanking" }
@@ -867,17 +856,16 @@ if is_available "telescope.nvim" then
     function() require("telescope.builtin").commands() end,
     desc = "Find commands",
   }
-  -- Let's disable this. It is way too imprecise. Use rnvimr instead.
-  -- maps.n["<leader>ff"] = {
-  --   function()
-  --     require("telescope.builtin").find_files { hidden = true, no_ignore = true }
-  --   end,
-  --   desc = "Find all files",
-  -- }
-  -- maps.n["<leader>fF"] = {
-  --   function() require("telescope.builtin").find_files() end,
-  --   desc = "Find files (no hidden)",
-  -- }
+  maps.n["<leader>ff"] = {
+    function()
+      require("telescope.builtin").find_files { hidden = true, no_ignore = true }
+    end,
+    desc = "Find all files",
+  }
+  maps.n["<leader>fF"] = {
+    function() require("telescope.builtin").find_files() end,
+    desc = "Find files (no hidden)",
+  }
   maps.n["<leader>fh"] = {
     function() require("telescope.builtin").help_tags() end,
     desc = "Find help",
@@ -890,12 +878,12 @@ if is_available "telescope.nvim" then
     function() require("telescope.builtin").man_pages() end,
     desc = "Find man",
   }
-  if is_available "nvim-notify" then
-    maps.n["<leader>fn"] = {
-      function() require("telescope").extensions.notify.notify() end,
-      desc = "Find notifications",
-    }
-  end
+  -- if is_available "nvim-notify" then
+  --   maps.n["<leader>fn"] = {
+  --     function() require("telescope").extensions.notify.notify() end,
+  --     desc = "Find notifications",
+  --   }
+  -- end
   maps.n["<leader>fo"] = {
     function() require("telescope.builtin").oldfiles() end,
     desc = "Find recent",
@@ -917,7 +905,7 @@ if is_available "telescope.nvim" then
     end,
     desc = "Find themes",
   }
-  maps.n["<leader>ff"] = {
+  maps.n["<leader>fW"] = {
     function()
       require("telescope.builtin").live_grep {
         additional_args = function(args)
@@ -927,7 +915,7 @@ if is_available "telescope.nvim" then
     end,
     desc = "Find words in project",
   }
-  maps.n["<leader>fF"] = {
+  maps.n["<leader>fn"] = {
     function() require("telescope.builtin").live_grep() end,
     desc = "Find words in project (no hidden)",
   }

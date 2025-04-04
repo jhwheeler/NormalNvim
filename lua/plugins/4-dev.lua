@@ -219,8 +219,8 @@ return {
     opts = {
       notify = { enabled = false },
       panel = {
-          orientation = "bottom",
-          panel_size = 10,
+        orientation = "bottom",
+        panel_size = 10,
       },
     },
     config = function(_, opts)
@@ -389,7 +389,7 @@ return {
       "OverseerClearCache"
     },
     opts = {
-     task_list = { -- the window that shows the results.
+      task_list = { -- the window that shows the results.
         direction = "bottom",
         min_height = 25,
         max_height = 25,
@@ -832,12 +832,22 @@ return {
       -- get neotest namespace (api call creates or returns namespace)
       local neotest_ns = vim.api.nvim_create_namespace "neotest"
       vim.diagnostic.config({
+        float = {
+        border = "rounded",
+        width = 60,
+        source = true,
+        wrap = true,
+        },
         virtual_text = {
           format = function(diagnostic)
             local message = diagnostic.message:gsub("\n", " "):gsub("\t", " "):gsub("%s+", " "):gsub("^%s+", "")
             return message
           end,
         },
+        signs = true,
+        underline = true,
+        update_in_insert = false,
+        severity_sort = true,
       }, neotest_ns)
       require("neotest").setup(opts)
     end,
@@ -898,4 +908,62 @@ return {
     end,
   },
 
+  {
+    "yetone/avante.nvim",
+    event = "VeryLazy",
+    lazy = false,
+    version = false,
+    build = "make",
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter",
+      "stevearc/dressing.nvim",
+      "nvim-lua/plenary.nvim",
+      "MunifTanjim/nui.nvim",
+      --- The below dependencies are optional,
+      "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
+      "zbirenbaum/copilot.lua", -- for providers='copilot'
+      {
+        -- support for image pasting
+        "HakonHarnes/img-clip.nvim",
+        event = "VeryLazy",
+        opts = {
+          -- recommended settings
+          default = {
+            embed_image_as_base64 = false,
+            prompt_for_file_name = false,
+            drag_and_drop = {
+              insert_mode = true,
+            },
+            -- required for Windows users
+            use_absolute_path = true,
+          },
+        },
+      },
+      {
+        -- Make sure to set this up properly if you have lazy=true
+        'MeanderingProgrammer/render-markdown.nvim',
+        opts = {
+          file_types = { "markdown", "Avante" },
+        },
+        ft = { "markdown", "Avante" },
+      },
+    },
+  },
+  {
+    'pwntester/octo.nvim',
+    event = "VeryLazy",
+    lazy = false,
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'nvim-telescope/telescope.nvim',
+      'nvim-tree/nvim-web-devicons',
+    },
+    config = function ()
+      require"octo".setup({ enable_builtin = true })
+      vim.cmd([[hi OctoEditable guibg=none]])
+    end,
+    keys = {
+      { "<leader>O", "<cmd>Octo<cr>", desc = "Octo" },
+    },
+  },
 } -- end of return

@@ -668,6 +668,4 @@ return {
       vim.api.nvim_create_user_command("PeekClose", require("peek").close, {})
     end,
   },
-
-
 } -- end of return

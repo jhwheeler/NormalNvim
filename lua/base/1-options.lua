@@ -1,14 +1,9 @@
--- HELLO, welcome to NormalNvim!
--- ----------------------------------------
--- Here you can define your nvim variables.
--- ----------------------------------------
-
 -- Theme
 vim.g.default_colorscheme = "tokyonight-night"
 
 -- Options --------------------------------------------------------------------
-vim.opt.breakindent = true -- Wrap indent to match  line start.
-vim.opt.clipboard = "unnamedplus" -- Connection to the system clipboard.
+vim.opt.breakindent = true -- Wrap indent to match line start.
+vim.opt.clipboard = "unnamed,unnamedplus" -- Connection to the system clipboard.
 vim.opt.cmdheight = 0 -- Hide command line unless needed.
 vim.opt.completeopt = { "menu", "menuone", "noselect" } -- Options for insert mode completion.
 vim.opt.copyindent = true -- Copy the previous indentation on autoindenting.
@@ -28,13 +23,13 @@ vim.opt.linebreak = true -- Wrap lines at 'breakat'.
 vim.opt.number = true -- Show numberline.
 vim.opt.preserveindent = true -- Preserve indent structure as much as possible.
 vim.opt.pumheight = 10 -- Height of the pop up menu.
-vim.opt.relativenumber = false -- Show relative numberline.
+vim.opt.relativenumber = true -- Show relative numberline.
 vim.opt.shiftwidth = 2 -- Number of space inserted for indentation.
 vim.opt.showmode = false -- Disable showing modes in command line.
 vim.opt.showtabline = 2 -- always display tabline.
 vim.opt.signcolumn = "yes" -- Always show the sign column.
 vim.opt.smartcase = true -- Case sensitivie searching.
-vim.opt.smartindent = false -- Smarter autoindentation.
+vim.opt.smartindent = true -- Smarter autoindentation.
 vim.opt.splitbelow = true -- Splitting a new window below the current one.
 vim.opt.splitright = true -- Splitting a new window at the right of the current one.
 vim.opt.tabstop = 2 -- Number of space in a tab.
@@ -52,7 +47,7 @@ vim.opt.colorcolumn = "80" -- PEP8 like character limit vertical bar.
 vim.opt.mousescroll = "ver:1,hor:0" -- Disables hozirontal scroll in neovim.
 vim.opt.guicursor = "n:blinkon200,i-ci-ve:ver25" -- Enable cursor blink.
 vim.opt.autochdir = true -- Use current file dir as working dir (See project.nvim).
-vim.opt.scrolloff = 1000 -- Number of lines to leave before/after the cursor when scrolling. Setting a high value keep the cursor centered.
+-- vim.opt.scrolloff = 1000 -- Number of lines to leave before/after the cursor when scrolling. Setting a high value keep the cursor centered.
 vim.opt.sidescrolloff = 8 -- Same but for side scrolling.
 vim.opt.selection = "old" -- Don't select the newline symbol when using <End> on visual mode.
 

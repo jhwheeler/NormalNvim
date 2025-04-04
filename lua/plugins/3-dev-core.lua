@@ -297,6 +297,7 @@ return {
             "javascriptreact",
             "typescript",
             "typescriptreact",
+            "svelte",
             "vue",
             "css",
             "scss",

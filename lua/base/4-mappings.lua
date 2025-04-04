@@ -86,10 +86,6 @@ local icons = {
 }
 
 -- standard Operations -----------------------------------------------------
-maps.n["j"] =
-{ "v:count == 0 ? 'gj' : 'j'", expr = true, desc = "Move cursor down" }
-maps.n["k"] =
-{ "v:count == 0 ? 'gk' : 'k'", expr = true, desc = "Move cursor up" }
 maps.n["<leader>w"] = { "<cmd>w<cr>", desc = "Save" }
 maps.n["<leader>W"] =
 { function() vim.cmd("SudaWrite") end, desc = "Save as sudo" }
@@ -101,21 +97,6 @@ maps.n["gx"] =
 maps.n["<C-s>"] = { "<cmd>w!<cr>", desc = "Force write" }
 maps.n["|"] = { "<cmd>vsplit<cr>", desc = "Vertical Split" }
 maps.n["\\"] = { "<cmd>split<cr>", desc = "Horizontal Split" }
-maps.i["<C-BS>"] = { "<C-W>", desc = "Enable CTRL+backsace to delete." }
-maps.n["0"] =
-{ "^", desc = "Go to the fist character of the line (aliases 0 to ^)" }
-maps.n["<leader>q"] = { "<cmd>confirm q<cr>", desc = "Quit" }
-maps.n["<leader>q"] = {
-  function()
-    -- Ask user for confirmation
-    local choice = vim.fn.confirm("Do you really want to exit nvim?", "&Yes\n&No", 2)
-    if choice == 1 then
-      -- If user confirms, but there are still files to be saved: Ask
-      vim.cmd('confirm quit')
-    end
-  end,
-  desc = "Quit",
-}
 maps.n["<Tab>"] = {
   "<Tab>",
   noremap = true,
@@ -123,58 +104,6 @@ maps.n["<Tab>"] = {
   expr = false,
   desc = "FIX: Prevent TAB from behaving like <C-i>, as they share the same internal code",
 }
-
--- clipboard ---------------------------------------------------------------
-
--- Make 'c' key not copy to clipboard when changing a character.
-maps.n["c"] = { '"_c', desc = "Change without yanking" }
-maps.n["C"] = { '"_C', desc = "Change without yanking" }
-maps.x["c"] = { '"_c', desc = "Change without yanking" }
-maps.x["C"] = { '"_C', desc = "Change without yanking" }
-
--- Make 'x' key not copy to clipboard when deleting a character.
-maps.n["x"] = {
-  -- Also let's allow 'x' key to delete blank lines in normal mode.
-  function()
-    if vim.fn.col "." == 1 then
-      local line = vim.fn.getline "."
-      if line:match "^%s*$" then
-        vim.api.nvim_feedkeys('"_dd', "n", false)
-        vim.api.nvim_feedkeys("$", "n", false)
-      else
-        vim.api.nvim_feedkeys('"_x', "n", false)
-      end
-    else
-      vim.api.nvim_feedkeys('"_x', "n", false)
-    end
-  end,
-  desc = "Delete character without yanking it",
-}
-maps.x["x"] = { '"_x', desc = "Delete all characters in line" }
-
--- Same for shifted X
-maps.n["X"] = {
-  -- Also let's allow 'x' key to delete blank lines in normal mode.
-  function()
-    if vim.fn.col "." == 1 then
-      local line = vim.fn.getline "."
-      if line:match "^%s*$" then
-        vim.api.nvim_feedkeys('"_dd', "n", false)
-        vim.api.nvim_feedkeys("$", "n", false)
-      else
-        vim.api.nvim_feedkeys('"_X', "n", false)
-      end
-    else
-      vim.api.nvim_feedkeys('"_X', "n", false)
-    end
-  end,
-  desc = "Delete before character without yanking it",
-}
-maps.x["X"] = { '"_X', desc = "Delete all characters in line" }
-
--- Override nvim default behavior so it doesn't auto-yank when pasting on visual mode.
-maps.x["p"] = { "P", desc = "Paste content you've previourly yanked" }
-maps.x["P"] = { "p", desc = "Yank what you are going to override, then paste" }
 
 -- search highlighting ------------------------------------------------------
 -- use ESC to clear hlsearch, while preserving its original functionality.
@@ -414,16 +343,6 @@ maps.n["<S-Up>"] = {
   desc = "Fast move up",
 }
 
--- tabs
-maps.n["]t"] = { function() vim.cmd.tabnext() end, desc = "Next tab" }
-maps.n["[t"] = { function() vim.cmd.tabprevious() end, desc = "Previous tab" }
-
--- zen mode
-if is_available "zen-mode.nvim" then
-  maps.n["<leader>uz"] =
-  { function() ui.toggle_zen_mode() end, desc = "Zen mode" }
-end
-
 -- ui toggles [ui] ---------------------------------------------------------
 maps.n["<leader>u"] = icons.u
 if is_available "nvim-autopairs" then
@@ -458,37 +377,6 @@ end
 if is_available "mini.animate" then
   maps.n["<leader>uA"] = { ui.toggle_animations, desc = "Animations" }
 end
-
--- shifted movement keys ----------------------------------------------------
-maps.n["<S-Down>"] = {
-  function() vim.api.nvim_feedkeys("7j", "n", true) end,
-  desc = "Fast move down",
-}
-maps.n["<S-Up>"] = {
-  function() vim.api.nvim_feedkeys("7k", "n", true) end,
-  desc = "Fast move up",
-}
-maps.n["<S-PageDown>"] = {
-  function()
-    local current_line = vim.fn.line "."
-    local total_lines = vim.fn.line "$"
-    local target_line = current_line + 1 + math.floor(total_lines * 0.20)
-    if target_line > total_lines then target_line = total_lines end
-    vim.api.nvim_win_set_cursor(0, { target_line, 0 })
-    vim.cmd("normal! zz")
-  end,
-  desc = "Page down exactly a 20% of the total size of the buffer",
-}
-maps.n["<S-PageUp>"] = {
-  function()
-    local current_line = vim.fn.line "."
-    local target_line = current_line - 1 - math.floor(vim.fn.line "$" * 0.20)
-    if target_line < 1 then target_line = 1 end
-    vim.api.nvim_win_set_cursor(0, { target_line, 0 })
-    vim.cmd("normal! zz")
-  end,
-  desc = "Page up exactly 20% of the total size of the buffer",
-}
 
 -- cmdline autocompletion ---------------------------------------------------
 maps.c["<Up>"] = {
@@ -631,23 +519,6 @@ if vim.fn.executable "lazygit" == 1 then -- if lazygit exists, show it
       end
     end,
     desc = "ToggleTerm lazygit",
-  }
-end
-if vim.fn.executable "gitui" == 1 then -- if gitui exists, show it
-  maps.n["<leader>gg"] = {
-    function()
-      local git_dir = vim.fn.finddir(".git", vim.fn.getcwd() .. ";")
-      if git_dir ~= "" then
-        if vim.fn.executable "keychain" == 1 then
-          vim.cmd('TermExec cmd="eval `keychain --eval ~/.ssh/github.key` && gitui && exit"')
-        else
-          vim.cmd("TermExec cmd='gitui && exit'")
-        end
-      else
-        utils.notify("Not a git repository", vim.log.levels.WARN)
-      end
-    end,
-    desc = "ToggleTerm gitui",
   }
 end
 
@@ -848,21 +719,17 @@ if is_available "telescope.nvim" then
     function() require("telescope.builtin").buffers() end,
     desc = "Find buffers",
   }
-  maps.n["<leader>fw"] = {
-    function() require("telescope.builtin").grep_string() end,
-    desc = "Find word under cursor in project",
-  }
   maps.n["<leader>fC"] = {
     function() require("telescope.builtin").commands() end,
     desc = "Find commands",
   }
-  maps.n["<leader>ff"] = {
+  maps.n["<leader>fF"] = {
     function()
       require("telescope.builtin").find_files { hidden = true, no_ignore = true }
     end,
     desc = "Find all files",
   }
-  maps.n["<leader>fF"] = {
+  maps.n["<leader>ff"] = {
     function() require("telescope.builtin").find_files() end,
     desc = "Find files (no hidden)",
   }
@@ -878,12 +745,12 @@ if is_available "telescope.nvim" then
     function() require("telescope.builtin").man_pages() end,
     desc = "Find man",
   }
-  -- if is_available "nvim-notify" then
-  --   maps.n["<leader>fn"] = {
-  --     function() require("telescope").extensions.notify.notify() end,
-  --     desc = "Find notifications",
-  --   }
-  -- end
+  if is_available "nvim-notify" then
+    maps.n["<leader>fn"] = {
+      function() require("telescope").extensions.notify.notify() end,
+      desc = "Find notifications",
+    }
+  end
   maps.n["<leader>fo"] = {
     function() require("telescope.builtin").oldfiles() end,
     desc = "Find recent",
@@ -905,6 +772,10 @@ if is_available "telescope.nvim" then
     end,
     desc = "Find themes",
   }
+  maps.n["<leader>fw"] = {
+    function() require("telescope.builtin").live_grep() end,
+    desc = "Find words in project (no hidden)",
+  }
   maps.n["<leader>fW"] = {
     function()
       require("telescope.builtin").live_grep {
@@ -915,9 +786,9 @@ if is_available "telescope.nvim" then
     end,
     desc = "Find words in project",
   }
-  maps.n["<leader>fn"] = {
-    function() require("telescope.builtin").live_grep() end,
-    desc = "Find words in project (no hidden)",
+  maps.n["<leader>fg"] = {
+    function() require("telescope.builtin").grep_string() end,
+    desc = "Find word under cursor in project",
   }
   maps.n["<leader>f/"] = {
     function() require("telescope.builtin").current_buffer_fuzzy_find() end,

@@ -7,7 +7,6 @@
 --       -> stickybuf.nvim         [lock special buffers]
 --       -> mini.bufremove         [smart bufdelete]
 --       -> smart-splits           [move and resize buffers]
---       -> better-scape.nvim      [esc]
 --       -> toggleterm.nvim        [term]
 --       -> session-manager        [session]
 --       -> spectre.nvim           [search and replace in project]
@@ -107,16 +106,6 @@ return {
       ignored_filetypes = { "nofile", "quickfix", "qf", "prompt" },
       ignored_buftypes = { "nofile" },
     },
-  },
-
-  -- better-scape.nvim [esc]
-  -- https://github.com/max397574/better-escape.nvim
-  {
-    "max397574/better-escape.nvim",
-    event = "User BaseDefered",
-    opts = {
-      timeout = 300,
-    }
   },
 
   -- Toggle floating terminal on <F7> [term]

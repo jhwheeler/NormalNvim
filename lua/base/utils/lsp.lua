@@ -40,39 +40,67 @@ M.apply_default_lsp_settings = function()
     vim.fn.sign_define(sign.name, sign)
   end
 
-  -- Borders
-  -- Apply the option lsp_round_borders_enabled from ../1-options.lua
-  if vim.g.lsp_round_borders_enabled then
-    vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded", silent = true })
-    vim.lsp.handlers["textDocument/signatureHelp"] =
-        vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded", silent = true })
-  end
+  vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(
+    vim.lsp.handlers.hover, {
+      border = "rounded",
+      wrap = true,
+      wrap_at = 60,
+      width = 60,
+      max_width = 60,
+      max_height = 40,
+    })
+  vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(
+    vim.lsp.handlers.signature_help, {
+      border = "rounded",
+      wrap = true,
+      wrap_at = 60,
+      width = 60,
+      max_width = 60,
+      max_height = 40,
+    })
 
   -- Set default diagnostics
-  local default_diagnostics = {
-    virtual_text = true,
-    signs = {
-      text = {
-        [vim.diagnostic.severity.ERROR] = utils.get_icon("DiagnosticError"),
-        [vim.diagnostic.severity.HINT] = utils.get_icon("DiagnosticHint"),
-        [vim.diagnostic.severity.WARN] = utils.get_icon("DiagnosticWarn"),
-        [vim.diagnostic.severity.INFO] = utils.get_icon("DiagnosticInfo"),
-      },
-      active = signs,
+local default_diagnostics = {
+  virtual_text = {
+    format = function(diagnostic)
+      local max_width = 100
+      local message = diagnostic.message
+      if #message > max_width then
+        message = message:sub(1, max_width) .. "..."
+      end
+      return message
+    end,
+    spacing = 4,
+    source = true,
+    prefix = "●",
+  },
+  signs = {
+    text = {
+      [vim.diagnostic.severity.ERROR] = utils.get_icon("DiagnosticError"),
+      [vim.diagnostic.severity.HINT] = utils.get_icon("DiagnosticHint"),
+      [vim.diagnostic.severity.WARN] = utils.get_icon("DiagnosticWarn"),
+      [vim.diagnostic.severity.INFO] = utils.get_icon("DiagnosticInfo"),
     },
-    update_in_insert = true,
-    underline = true,
-    severity_sort = true,
-    float = {
-      focused = false,
-      style = "minimal",
-      border = "rounded",
-      source = "always",
-      header = "",
-      prefix = "",
-    },
-  }
-
+    active = signs,
+  },
+  update_in_insert = true,
+  underline = true,
+  severity_sort = true,
+  float = {
+    border = "rounded",
+    source = true,
+    format = function(diagnostic)
+      return string.format(
+        "%s\n\n%s",
+        diagnostic.message:gsub("\n+", "\n"),
+        diagnostic.source and ("Source: " .. diagnostic.source) or ""
+      )
+    end,
+    width = 60,
+    max_width = 60,
+    max_height = 40,
+  },
+}
   -- Apply default diagnostics
   -- Applies the option diagnostics_mode from ../1-options.lua
   M.diagnostics = {
@@ -162,6 +190,7 @@ function M.apply_user_lsp_settings(server_name)
     -- Also, apply mappings to the buffer.
     M.apply_user_lsp_mappings(client, bufnr)
   end
+
   return opts
 end
 

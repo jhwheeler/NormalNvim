@@ -46,7 +46,6 @@ vim.opt.wrap = true -- Disable wrapping of lines longer than the width of window
 vim.opt.colorcolumn = "80" -- PEP8 like character limit vertical bar.
 vim.opt.mousescroll = "ver:1,hor:0" -- Disables hozirontal scroll in neovim.
 vim.opt.guicursor = "n:blinkon200,i-ci-ve:ver25" -- Enable cursor blink.
-vim.opt.autochdir = true -- Use current file dir as working dir (See project.nvim).
 -- vim.opt.scrolloff = 1000 -- Number of lines to leave before/after the cursor when scrolling. Setting a high value keep the cursor centered.
 vim.opt.sidescrolloff = 8 -- Same but for side scrolling.
 vim.opt.selection = "old" -- Don't select the newline symbol when using <End> on visual mode.
@@ -54,7 +53,7 @@ vim.opt.selection = "old" -- Don't select the newline symbol when using <End> on
 vim.opt.viewoptions:remove "curdir" -- Disable saving current directory with views.
 vim.opt.shortmess:append { s = true, I = true } -- Disable startup message.
 vim.opt.backspace:append { "nostop" } -- Don't stop backspace at insert.
-vim.opt.diffopt:append { "algorithm:histogram", "linematch:60" } -- Enable linematch diff algorithm
+vim.opt.diffopt:append { "algorithm:histogram", "linematch:60", "followwrap" } -- Enable linematch diff algorithm
 
 local is_android = vim.fn.isdirectory('/data') == 1
 if is_android then vim.opt.mouse = "v" else vim.opt.mouse = "a" end -- Enable scroll for android

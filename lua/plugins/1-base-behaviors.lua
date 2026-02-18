@@ -16,7 +16,6 @@
 --       -> zen-mode.nvim          [distraction free mode]
 --       -> suda.vim               [write as sudo]
 --       -> vim-matchup            [Improved % motion]
---       -> hop.nvim               [go to word visually]
 --       -> nvim-autopairs         [auto close brackets]
 --       -> nvim-ts-autotag        [auto close html tags]
 --       -> lsp_signature.nvim     [auto params help]
@@ -534,13 +533,6 @@ return {
     end,
   },
 
-  --  hop.nvim [go to word visually]
-  --  https://github.com/smoka7/hop.nvim
-  {
-    "smoka7/hop.nvim",
-    cmd = { "HopWord" },
-    opts = { keys = "etovxqpdygfblzhckisuran" }
-  },
 
   --  nvim-autopairs [auto close brackets]
   --  https://github.com/windwp/nvim-autopairs
@@ -551,7 +543,7 @@ return {
     dependencies = "windwp/nvim-ts-autotag",
     opts = {
       check_ts = true,
-      ts_config = { java = false },
+      ts_config = {},
       fast_wrap = {
         map = "<M-e>",
         chars = { "{", "[", "(", '"', "'" },
@@ -622,32 +614,6 @@ return {
     config = function(_, opts) require('lsp_signature').setup(opts) end
   },
 
-  -- nvim-lightbulb [lightbulb for code actions]
-  -- https://github.com/kosayoda/nvim-lightbulb
-  -- Show a lightbulb where a code action is available
-  {
-    'kosayoda/nvim-lightbulb',
-    enabled = vim.g.codeactions_enabled,
-    event = "User BaseFile",
-    opts = {
-      action_kinds = { -- show only for relevant code actions.
-        "quickfix",
-      },
-      ignore = {
-        ft = { "lua", "markdown" }, -- ignore filetypes with bad code actions.
-      },
-      autocmd = {
-        enabled = true,
-        updatetime = 100,
-      },
-      sign = { enabled = false },
-      virtual_text = {
-        enabled = true,
-        text = require("base.utils").get_icon("Lightbulb")
-      }
-    },
-    config = function(_, opts) require("nvim-lightbulb").setup(opts) end
-  },
 
   -- distroupdate.nvim [distro update]
   -- https://github.com/zeioth/distroupdate.nvim

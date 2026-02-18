@@ -19,9 +19,6 @@
 --       -> markdown-preview.nvim          [markdown previewer]
 --       -> markmap.nvim                   [markdown mindmap]
 
---       ## ARTIFICIAL INTELLIGENCE
---       -> neural                         [chatgpt code generator]
---       -> copilot                        [github code suggestions]
 --       -> guess-indent                   [guess-indent]
 
 --       ## COMPILER
@@ -34,9 +31,6 @@
 --       ## TESTING
 --       -> neotest.nvim                   [unit testing]
 --       -> nvim-coverage                  [code coverage]
-
---       ## LANGUAGE IMPROVEMENTS
---       -> guttentags_plus                [auto generate C/C++ tags]
 
 local is_windows = vim.fn.has('win32') == 1 -- true if on windows
 
@@ -70,14 +64,6 @@ return {
       require("luasnip").filetype_extend("javascript", { "jsdoc" })
       require("luasnip").filetype_extend("lua", { "luadoc" })
       require("luasnip").filetype_extend("python", { "pydoc" })
-      require("luasnip").filetype_extend("rust", { "rustdoc" })
-      require("luasnip").filetype_extend("cs", { "csharpdoc" })
-      require("luasnip").filetype_extend("java", { "javadoc" })
-      require("luasnip").filetype_extend("c", { "cdoc" })
-      require("luasnip").filetype_extend("cpp", { "cppdoc" })
-      require("luasnip").filetype_extend("php", { "phpdoc" })
-      require("luasnip").filetype_extend("kotlin", { "kdoc" })
-      require("luasnip").filetype_extend("ruby", { "rdoc" })
       require("luasnip").filetype_extend("sh", { "shelldoc" })
     end,
   },
@@ -195,7 +181,7 @@ return {
     config = function(_, opts)
       require("aerial").setup(opts)
       -- HACK: The first time you open aerial on a session, close all folds.
-      vim.api.nvim_create_autocmd({"FileType", "BufEnter"}, {
+      vim.api.nvim_create_autocmd({ "FileType", "BufEnter" }, {
         desc = "Aerial: When aerial is opened, close all its folds.",
         callback = function()
           local is_aerial = vim.bo.filetype == "aerial"
@@ -253,8 +239,10 @@ return {
               vim.wo.colorcolumn = "0"
               vim.wo.foldcolumn = "0"
               vim.cmd("silent! PinBuffer") -- stickybuf.nvim
-              vim.cmd("silent! hi LTSymbolJump ctermfg=015 ctermbg=110 cterm=italic,bold,underline guifg=#464646 guibg=#87afd7 gui=italic,bold")
-              vim.cmd("silent! hi LTSymbolJumpRefs ctermfg=015 ctermbg=110 cterm=italic,bold,underline guifg=#464646 guibg=#87afd7 gui=italic,bold")
+              vim.cmd(
+                "silent! hi LTSymbolJump ctermfg=015 ctermbg=110 cterm=italic,bold,underline guifg=#464646 guibg=#87afd7 gui=italic,bold")
+              vim.cmd(
+                "silent! hi LTSymbolJumpRefs ctermfg=015 ctermbg=110 cterm=italic,bold,underline guifg=#464646 guibg=#87afd7 gui=italic,bold")
             else
               vim.cmd("silent! highlight clear LTSymbolJump")
               vim.cmd("silent! highlight clear LTSymbolJumpRefs")
@@ -302,45 +290,6 @@ return {
     config = function(_, opts) require("markmap").setup(opts) end,
   },
 
-  --  ARTIFICIAL INTELLIGENCE  -------------------------------------------------
-  --  neural [chatgpt code generator]
-  --  https://github.com/dense-analysis/neural
-  --
-  --  NOTE: In order for this plugin to work, you will have to set
-  --        the next env var in your OS:
-  --        OPENAI_API_KEY="my_key_here"
-  {
-    "dense-analysis/neural",
-    cmd = { "Neural" },
-    config = function()
-      require("neural").setup {
-        source = {
-          openai = {
-            api_key = vim.env.OPENAI_API_KEY,
-          },
-        },
-        ui = {
-          prompt_icon = require("base.utils").get_icon("PromptPrefix"),
-        },
-      }
-    end,
-  },
-
-  --  copilot [github code suggestions]
-  --  https://github.com/github/copilot.vim
-  --  As alternative to chatgpt, you can use copilot uncommenting this.
-  --  Then you must run :Copilot setup
-  -- {
-  --   "github/copilot.vim",
-  --   event = "User BaseFile"
-  -- },
-  -- copilot-cmp
-  -- https://github.com/zbirenbaum/copilot-cmp
-  -- {
-  --   "zbirenbaum/copilot-cmp",
-  --   opts = { suggesion = { enabled = false }, panel = { enabled = false } },
-  --   config = function (_, opts) require("copilot_cmp").setup(opts) end
-  -- },
 
   -- [guess-indent]
   -- https://github.com/NMAC427/guess-indent.nvim
@@ -422,33 +371,6 @@ return {
     config = function()
       local dap = require("dap")
 
-      -- C#
-      dap.adapters.coreclr = {
-        type = 'executable',
-        command = vim.fn.stdpath('data') .. '/mason/bin/netcoredbg',
-        args = { '--interpreter=vscode' }
-      }
-      dap.configurations.cs = {
-        {
-          type = "coreclr",
-          name = "launch - netcoredbg",
-          request = "launch",
-          program = function() -- Ask the user what executable wants to debug
-            return vim.fn.input('Path to dll: ', vim.fn.getcwd() .. '/bin/Program.exe', 'file')
-          end,
-        },
-      }
-
-      -- F#
-      dap.configurations.fsharp = dap.configurations.cs
-
-      -- Visual basic dotnet
-      dap.configurations.vb = dap.configurations.cs
-
-      -- Java
-      -- Note: The java debugger jdtls is automatically spawned and configured
-      -- by the plugin 'nvim-java' in './3-dev-core.lua'.
-
       -- Python
       dap.adapters.python = {
         type = 'executable',
@@ -477,144 +399,6 @@ return {
         }
       }
 
-      -- C
-      dap.adapters.codelldb = {
-        type = 'server',
-        port = "${port}",
-        executable = {
-          command = vim.fn.stdpath('data') .. '/mason/bin/codelldb',
-          args = { "--port", "${port}" },
-          detached = function() if is_windows then return false else return true end end,
-        }
-      }
-      dap.configurations.c = {
-        {
-          name = 'Launch',
-          type = 'codelldb',
-          request = 'launch',
-          program = function() -- Ask the user what executable wants to debug
-            return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/bin/program', 'file')
-          end,
-          cwd = '${workspaceFolder}',
-          stopOnEntry = false,
-          args = {},
-        },
-      }
-
-      -- C++
-      dap.configurations.cpp = dap.configurations.c
-
-      -- Rust
-      dap.configurations.rust = {
-        {
-          name = 'Launch',
-          type = 'codelldb',
-          request = 'launch',
-          program = function() -- Ask the user what executable wants to debug
-            return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/bin/program', 'file')
-          end,
-          cwd = '${workspaceFolder}',
-          stopOnEntry = false,
-          args = {},
-          initCommands = function() -- add rust types support (optional)
-            -- Find out where to look for the pretty printer Python module
-            local rustc_sysroot = vim.fn.trim(vim.fn.system('rustc --print sysroot'))
-
-            local script_import = 'command script import "' .. rustc_sysroot .. '/lib/rustlib/etc/lldb_lookup.py"'
-            local commands_file = rustc_sysroot .. '/lib/rustlib/etc/lldb_commands'
-
-            local commands = {}
-            local file = io.open(commands_file, 'r')
-            if file then
-              for line in file:lines() do
-                table.insert(commands, line)
-              end
-              file:close()
-            end
-            table.insert(commands, 1, script_import)
-
-            return commands
-          end,
-        }
-      }
-
-      -- Go
-      -- Requires:
-      -- * You have initialized your module with 'go mod init module_name'.
-      -- * You :cd your project before running DAP.
-      dap.adapters.delve = {
-        type = 'server',
-        port = '${port}',
-        executable = {
-          command = vim.fn.stdpath('data') .. '/mason/packages/delve/dlv',
-          args = { 'dap', '-l', '127.0.0.1:${port}' },
-        }
-      }
-      dap.configurations.go = {
-        {
-          type = "delve",
-          name = "Compile module and debug this file",
-          request = "launch",
-          program = "./${relativeFileDirname}",
-        },
-        {
-          type = "delve",
-          name = "Compile module and debug this file (test)",
-          request = "launch",
-          mode = "test",
-          program = "./${relativeFileDirname}"
-        },
-      }
-
-      -- Dart / Flutter
-      dap.adapters.dart = {
-        type = 'executable',
-        command = vim.fn.stdpath('data') .. '/mason/bin/dart-debug-adapter',
-        args = { 'dart' }
-      }
-      dap.adapters.flutter = {
-        type = 'executable',
-        command = vim.fn.stdpath('data') .. '/mason/bin/dart-debug-adapter',
-        args = { 'flutter' }
-      }
-      dap.configurations.dart = {
-        {
-          type = "dart",
-          request = "launch",
-          name = "Launch dart",
-          dartSdkPath = "/opt/flutter/bin/cache/dart-sdk/", -- ensure this is correct
-          flutterSdkPath = "/opt/flutter",                  -- ensure this is correct
-          program = "${workspaceFolder}/lib/main.dart",     -- ensure this is correct
-          cwd = "${workspaceFolder}",
-        },
-        {
-          type = "flutter",
-          request = "launch",
-          name = "Launch flutter",
-          dartSdkPath = "/opt/flutter/bin/cache/dart-sdk/", -- ensure this is correct
-          flutterSdkPath = "/opt/flutter",                  -- ensure this is correct
-          program = "${workspaceFolder}/lib/main.dart",     -- ensure this is correct
-          cwd = "${workspaceFolder}",
-        }
-      }
-
-      -- Kotlin
-      -- Kotlin projects have very weak project structure conventions.
-      -- You must manually specify what the project root and main class are.
-      dap.adapters.kotlin = {
-        type = 'executable',
-        command = vim.fn.stdpath('data') .. '/mason/bin/kotlin-debug-adapter',
-      }
-      dap.configurations.kotlin = {
-        {
-          type = 'kotlin',
-          request = 'launch',
-          name = 'Launch kotlin program',
-          projectRoot = "${workspaceFolder}/app",     -- ensure this is correct
-          mainClass = "AppKt",                        -- ensure this is correct
-        },
-      }
-
       -- Javascript / Typescript (firefox)
       dap.adapters.firefox = {
         type = 'executable',
@@ -634,47 +418,6 @@ return {
       dap.configurations.javascript = dap.configurations.typescript
       dap.configurations.javascriptreact = dap.configurations.typescript
       dap.configurations.typescriptreact = dap.configurations.typescript
-
-      -- Javascript / Typescript (chromium)
-      -- If you prefer to use this adapter, comment the firefox one.
-      -- But to use this adapter, you must manually run one of these two, first:
-      -- * chromium --remote-debugging-port=9222 --user-data-dir=remote-profile
-      -- * google-chrome-stable --remote-debugging-port=9222 --user-data-dir=remote-profile
-      -- After starting the debugger, you must manually reload page to get all features.
-      -- dap.adapters.chrome = {
-      --  type = 'executable',
-      --  command = vim.fn.stdpath('data')..'/mason/bin/chrome-debug-adapter',
-      -- }
-      -- dap.configurations.typescript = {
-      --  {
-      --   name = 'Debug with Chromium',
-      --   type = "chrome",
-      --   request = "attach",
-      --   program = "${file}",
-      --   cwd = vim.fn.getcwd(),
-      --   sourceMaps = true,
-      --   protocol = "inspector",
-      --   port = 9222,
-      --   webRoot = "${workspaceFolder}"
-      --  }
-      -- }
-      -- dap.configurations.javascript = dap.configurations.typescript
-      -- dap.configurations.javascriptreact = dap.configurations.typescript
-      -- dap.configurations.typescriptreact = dap.configurations.typescript
-
-      -- PHP
-      dap.adapters.php = {
-        type = 'executable',
-        command = vim.fn.stdpath("data") .. '/mason/bin/php-debug-adapter',
-      }
-      dap.configurations.php = {
-        {
-          type = 'php',
-          request = 'launch',
-          name = 'Listen for Xdebug',
-          port = 9000
-        }
-      }
 
       -- Shell
       dap.adapters.bashdb = {
@@ -704,34 +447,12 @@ return {
         }
       }
 
-      -- Elixir
-      dap.adapters.mix_task = {
-        type = 'executable',
-        command = vim.fn.stdpath("data") .. '/mason/bin/elixir-ls-debugger',
-        args = {}
-      }
-      dap.configurations.elixir = {
-        {
-          type = "mix_task",
-          name = "mix test",
-          task = 'test',
-          taskArgs = { "--trace" },
-          request = "launch",
-          startApps = true, -- for Phoenix projects
-          projectDir = "${workspaceFolder}",
-          requireFiles = {
-            "test/**/test_helper.exs",
-            "test/**/*_test.exs"
-          }
-        },
-      }
     end, -- of dap config
     dependencies = {
       "rcarriga/nvim-dap-ui",
       "rcarriga/cmp-dap",
       "jay-babu/mason-nvim-dap.nvim",
       "jbyuki/one-small-step-for-vimkind",
-      "nvim-java/nvim-java",
     },
   },
 
@@ -800,31 +521,13 @@ return {
     "nvim-neotest/neotest",
     cmd = { "Neotest" },
     dependencies = {
-      "sidlatau/neotest-dart",
-      "Issafalcon/neotest-dotnet",
-      "jfpedroza/neotest-elixir",
-      "fredrikaverpil/neotest-golang",
-      "rcasia/neotest-java",
       "nvim-neotest/neotest-jest",
-      "olimorris/neotest-phpunit",
-      "nvim-neotest/neotest-python",
-      "rouge8/neotest-rust",
-      "lawrence-laz/neotest-zig",
     },
     opts = function()
       return {
         -- your neotest config here
         adapters = {
-          require("neotest-dart"),
-          require("neotest-dotnet"),
-          require("neotest-elixir"),
-          require("neotest-golang"),
-          require("neotest-java"),
           require("neotest-jest"),
-          require("neotest-phpunit"),
-          require("neotest-python"),
-          require("neotest-rust"),
-          require("neotest-zig"),
         },
       }
     end,
@@ -833,10 +536,10 @@ return {
       local neotest_ns = vim.api.nvim_create_namespace "neotest"
       vim.diagnostic.config({
         float = {
-        border = "rounded",
-        width = 60,
-        source = true,
-        wrap = true,
+          border = "rounded",
+          width = 60,
+          source = true,
+          wrap = true,
         },
         virtual_text = {
           format = function(diagnostic)
@@ -884,69 +587,125 @@ return {
     config = function(_, opts) require("coverage").setup(opts) end,
   },
 
-  -- LANGUAGE IMPROVEMENTS ----------------------------------------------------
-  -- guttentags_plus [auto generate C/C++ tags]
-  -- https://github.com/skywind3000/gutentags_plus
-  -- This plugin is necessary for using <C-]> (go to ctag).
   {
-    "skywind3000/gutentags_plus",
-    ft = { "c", "cpp" },
-    dependencies = { "ludovicchabant/vim-gutentags" },
+    "ThePrimeagen/99",
+    event = "VeryLazy",
     config = function()
-      -- NOTE: On vimplugins we use config instead of opts.
-      vim.g.gutentags_plus_nomap = 1
-      vim.g.gutentags_resolve_symlinks = 1
-      vim.g.gutentags_cache_dir = vim.fn.stdpath "cache" .. "/tags"
-      vim.api.nvim_create_autocmd("FileType", {
-        desc = "Auto generate C/C++ tags",
-        callback = function()
-          local is_c = vim.bo.filetype == "c" or vim.bo.filetype == "cpp"
-          if is_c then vim.g.gutentags_enabled = 1
-          else vim.g.gutentags_enabled = 0 end
-        end,
+      -- Ensure opencode is on PATH for vim.system calls
+      local opencode_bin = vim.fn.expand("~/.opencode/bin")
+      if vim.fn.isdirectory(opencode_bin) == 1 and not vim.env.PATH:find(opencode_bin, 1, true) then
+        vim.env.PATH = opencode_bin .. ":" .. vim.env.PATH
+      end
+
+      local _99 = require("99")
+
+      -- For logging that is to a file if you wish to trace through requests
+      -- for reporting bugs, i would not rely on this, but instead the provided
+      -- logging mechanisms within 99.  This is for more debugging purposes
+      local cwd = vim.uv.cwd()
+      local basename = vim.fs.basename(cwd)
+      _99.setup({
+        -- provider = _99.ClaudeCodeProvider,  -- default: OpenCodeProvider
+        logger = {
+          level = _99.DEBUG,
+          path = "/tmp/" .. basename .. ".99.debug",
+          print_on_error = true,
+        },
+
+        --- Completions: #rules and @files in the prompt buffer
+        completion = {
+          -- I am going to disable these until i understand the
+          -- problem better.  Inside of cursor rules there is also
+          -- application rules, which means i need to apply these
+          -- differently
+          -- cursor_rules = "<custom path to cursor rules>"
+
+          --- A list of folders where you have your own SKILL.md
+          --- Expected format:
+          --- /path/to/dir/<skill_name>/SKILL.md
+          ---
+          --- Example:
+          --- Input Path:
+          --- "scratch/custom_rules/"
+          ---
+          --- Output Rules:
+          --- {path = "scratch/custom_rules/vim/SKILL.md", name = "vim"},
+          --- ... the other rules in that dir ...
+          ---
+          custom_rules = {
+            "./cursor/skills/",
+          },
+
+          --- Configure @file completion (all fields optional, sensible defaults)
+          files = {
+            enabled = true,
+            max_file_size = 102400, -- bytes, skip files larger than this
+            max_files = 5000,       -- cap on total discovered files
+            exclude = { ".env", ".env.*", "node_modules", ".git" },
+          },
+
+          --- What autocomplete do you use.  We currently only
+          --- support cmp right now
+          source = "cmp",
+        },
+
+        --- WARNING: if you change cwd then this is likely broken
+        --- ill likely fix this in a later change
+        ---
+        --- md_files is a list of files to look for and auto add based on the location
+        --- of the originating request.  That means if you are at /foo/bar/baz.lua
+        --- the system will automagically look for:
+        --- /foo/bar/AGENT.md
+        --- /foo/AGENT.md
+        --- assuming that /foo is project root (based on cwd)
+        md_files = {
+          "AGENT.md",
+        },
       })
+
+      -- take extra note that i have visual selection only in v mode
+      -- technically whatever your last visual selection is, will be used
+      -- so i have this set to visual mode so i dont screw up and use an
+      -- old visual selection
+      --
+      -- likely ill add a mode check and assert on required visual mode
+      -- so just prepare for it now
+      vim.keymap.set("v", "<leader>9v", function()
+        _99.visual()
+      end)
+
+      --- if you have a request you dont want to make any changes, just cancel it
+      vim.keymap.set("v", "<leader>9s", function()
+        _99.stop_all_requests()
+      end)
     end,
   },
-
   {
-    "yetone/avante.nvim",
-    event = "VeryLazy",
-    lazy = false,
-    version = false,
-    build = "make",
-    dependencies = {
-      "nvim-treesitter/nvim-treesitter",
-      "stevearc/dressing.nvim",
-      "nvim-lua/plenary.nvim",
-      "MunifTanjim/nui.nvim",
-      --- The below dependencies are optional,
-      "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
-      "zbirenbaum/copilot.lua", -- for providers='copilot'
-      {
-        -- support for image pasting
-        "HakonHarnes/img-clip.nvim",
-        event = "VeryLazy",
-        opts = {
-          -- recommended settings
-          default = {
-            embed_image_as_base64 = false,
-            prompt_for_file_name = false,
-            drag_and_drop = {
-              insert_mode = true,
-            },
-            -- required for Windows users
-            use_absolute_path = true,
-          },
-        },
+    "coder/claudecode.nvim",
+    dependencies = { "folke/snacks.nvim" },
+    opts = {
+      terminal = {
+        git_repo_cwd = true,
       },
+    },
+    keys = {
+      { "<leader>a",  nil,                              desc = "AI/Claude Code" },
+      { "<leader>ac", "<cmd>ClaudeCode<cr>",            desc = "Toggle Claude" },
+      { "<leader>af", "<cmd>ClaudeCodeFocus<cr>",       desc = "Focus Claude" },
+      { "<leader>ar", "<cmd>ClaudeCode --resume<cr>",   desc = "Resume Claude" },
+      { "<leader>aC", "<cmd>ClaudeCode --continue<cr>", desc = "Continue Claude" },
+      { "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", desc = "Select Claude model" },
+      { "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>",       desc = "Add current buffer" },
+      { "<leader>as", "<cmd>ClaudeCodeSend<cr>",        mode = "v",                  desc = "Send to Claude" },
       {
-        -- Make sure to set this up properly if you have lazy=true
-        'MeanderingProgrammer/render-markdown.nvim',
-        opts = {
-          file_types = { "markdown", "Avante" },
-        },
-        ft = { "markdown", "Avante" },
+        "<leader>as",
+        "<cmd>ClaudeCodeTreeAdd<cr>",
+        desc = "Add file",
+        ft = { "NvimTree", "neo-tree", "oil", "minifiles", "netrw" },
       },
+      -- Diff management
+      { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept diff" },
+      { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>",   desc = "Deny diff" },
     },
   },
   {
@@ -958,8 +717,8 @@ return {
       'nvim-telescope/telescope.nvim',
       'nvim-tree/nvim-web-devicons',
     },
-    config = function ()
-      require"octo".setup({ enable_builtin = true })
+    config = function()
+      require "octo".setup({ enable_builtin = true })
       vim.cmd([[hi OctoEditable guibg=none]])
     end,
     keys = {

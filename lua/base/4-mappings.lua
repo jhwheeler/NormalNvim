@@ -515,7 +515,11 @@ if vim.fn.executable "lazygit" == 1 then -- if lazygit exists, show it
           lazygit_term = Terminal:new({
             cmd = "lazygit",
             direction = "float",
-            float_opts = { border = "rounded" },
+            float_opts = {
+              border = "rounded",
+              width = math.floor(vim.o.columns * 0.97),
+              height = math.floor(vim.o.lines * 0.90),
+            },
             on_exit = function() lazygit_term = nil end,
           })
         end
@@ -1204,7 +1208,7 @@ function M.lsp_mappings(client, bufnr)
   lsp_mappings.n["gl"] = { function() vim.diagnostic.open_float() end, desc = "Hover diagnostics" }
   if is_available("telescope.nvim") then
     lsp_mappings.n["<leader>lD"] =
-      { function() require("telescope.builtin").diagnostics() end, desc = "Diagnostics" }
+    { function() require("telescope.builtin").diagnostics() end, desc = "Diagnostics" }
   end
 
   -- LSP info

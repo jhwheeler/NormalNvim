@@ -32,8 +32,6 @@
 --       -> tests                              [tests]
 --       -> nvim-ufo
 --       -> code documentation                 [docs]
---       -> ask chatgpt                        [neural]
---       -> hop.nvim
 --       -> mason-lspconfig.nvim               [lsp]
 
 --
@@ -509,11 +507,21 @@ if is_available "vim-fugitive" then
 end
 -- git client
 if vim.fn.executable "lazygit" == 1 then -- if lazygit exists, show it
+  local lazygit_term
   maps.n["<leader>gg"] = {
     function()
       local git_dir = vim.fn.finddir(".git", vim.fn.getcwd() .. ";")
       if git_dir ~= "" then
-        vim.cmd("TermExec cmd='lazygit && exit'")
+        if not lazygit_term then
+          local Terminal = require("toggleterm.terminal").Terminal
+          lazygit_term = Terminal:new({
+            cmd = "lazygit",
+            direction = "float",
+            float_opts = { border = "rounded" },
+            on_exit = function() lazygit_term = nil end,
+          })
+        end
+        lazygit_term:toggle()
       else
         utils.notify("Not a git repository", vim.log.levels.WARN)
       end
@@ -1156,34 +1164,7 @@ if is_available "markdown-preview.nivm" or is_available "markmap.nvim" or is_ava
   end
 end
 
--- [neural] -----------------------------------------------------------------
-if is_available "neural" or is_available "copilot" then
-  maps.n["<leader>a"] = {
-    function() require("neural").prompt() end,
-    desc = "Ask chatgpt",
-  }
-end
 
--- hop.nivm ----------------------------------------------------------------
-if is_available "hop.nvim" then
-  -- Note that Even though we are using ENTER for hop, you can still select items
-  -- from special menus like 'quickfix', 'q?' and 'q:' with <C+ENTER>.
-
-  maps.n["<C-m>"] = { -- The terminal undersand C-m and ENTER as the same key.
-    function()
-      require("hop")
-      vim.cmd("silent! HopWord")
-    end,
-    desc = "Hop to word",
-  }
-  maps.x["<C-m>"] = { -- The terminal undersand C-m and ENTER as the same key.
-    function()
-      require("hop")
-      vim.cmd("silent! HopWord")
-    end,
-    desc = "Hop to word",
-  }
-end
 
 -- mason-lspconfig.nvim [lsp] -------------------------------------------------
 -- WARNING: Don't delete this section, or you won't have LSP keymappings.

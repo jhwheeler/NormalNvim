@@ -167,6 +167,8 @@ function M.apply_user_lsp_settings(server_name)
   M.capabilities.textDocument.completion.completionItem.resolveSupport =
   { properties = { "documentation", "detail", "additionalTextEdits" } }
   M.capabilities.textDocument.foldingRange = { dynamicRegistration = false, lineFoldingOnly = true }
+  -- Advertise preferred hover content formats (needed by some servers)
+  M.capabilities.textDocument.hover = { contentFormat = { "markdown", "plaintext" } }
   M.flags = {}
   local opts = vim.tbl_deep_extend("force", server, { capabilities = M.capabilities, flags = M.flags })
 
@@ -180,6 +182,20 @@ function M.apply_user_lsp_settings(server_name)
   if server_name == "yamlls" then -- Add schemastore schemas
     local is_schemastore_loaded, schemastore = pcall(require, "schemastore")
     if is_schemastore_loaded then opts.settings = { yaml = { schemas = schemastore.yaml.schemas() } } end
+  end
+
+  -- Prefer the package root for Svelte projects over the workspace root.
+  -- This avoids monorepo roots (e.g. pnpm-workspace.yaml) that can confuse svelteserver.
+  if server_name == "svelte" then
+    local util = require("lspconfig.util")
+    opts.root_dir = util.root_pattern(
+      "svelte.config.js",
+      "svelte.config.cjs",
+      "svelte.config.ts",
+      "package.json",
+      "tsconfig.json",
+      ".git"
+    )
   end
 
   -- Apply them

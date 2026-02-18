@@ -197,6 +197,19 @@ autocmd("BufWritePre", {
   end,
 })
 
+-- 5b. Apply LSP keymappings when an LSP client attaches to a buffer.
+--     (mason-lspconfig v2 removed `handlers`, so on_attach from
+--      apply_user_lsp_settings is no longer called automatically.)
+autocmd("LspAttach", {
+  desc = "Apply user LSP keymappings on LspAttach",
+  callback = function(args)
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    if client then
+      require("base.utils.lsp").apply_user_lsp_mappings(client, args.buf)
+    end
+  end,
+})
+
 -- ## COOL HACKS ------------------------------------------------------------
 -- 6. Effect: URL underline.
 vim.api.nvim_set_hl(0, 'HighlightURL', { underline = true })

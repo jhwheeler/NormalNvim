@@ -4,7 +4,6 @@
 --    Sections:
 --       ## TREE SITTER
 --       -> nvim-treesitter                [syntax highlight]
---       -> ts-comments.nvim               [treesitter comments]
 --       -> render-markdown.nvim           [normal mode markdown]
 --       -> nvim-highlight-colors          [hex colors]
 
@@ -13,8 +12,7 @@
 --       -> nvim-lspconfig                 [lsp configs]
 --       -> mason.nvim                     [lsp package manager]
 --       -> SchemaStore.nvim               [mason extra schemas]
---       -> none-ls-autoload.nvim          [mason package loader]
---       -> none-ls                        [lsp code formatting]
+--       -> conform.nvim                   [code formatting]
 --       -> garbage-day                    [lsp garbage collector]
 --       -> lazydev                        [lua lsp for nvim plugins]
 
@@ -26,11 +24,10 @@
 --       -> cmp-luasnip                    [auto completion snippets]
 
 local utils = require("base.utils")
-local utils_lsp = require("base.utils.lsp")
 
 return {
   --  TREE SITTER ---------------------------------------------------------
-  --  [syntax highlight] + [treesitter understand html tags] + [comments]
+  --  [syntax highlight]
   --  https://github.com/nvim-treesitter/nvim-treesitter
   --  https://github.com/windwp/nvim-treesitter-textobjects
   {
@@ -191,7 +188,7 @@ return {
   -- https://github.com/mason-org/mason-lspconfig.nvim
   -- v2: uses `automatic_enable` (default true) + vim.lsp.config() instead of handlers.
   {
-    "williamboman/mason-lspconfig.nvim",
+    "mason-org/mason-lspconfig.nvim",
     dependencies = { "neovim/nvim-lspconfig" },
     event = "User BaseFile",
     opts = {
@@ -199,16 +196,26 @@ return {
     },
     config = function(_, opts)
       require("mason-lspconfig").setup(opts)
-      utils_lsp.apply_default_lsp_settings() -- Apply our default lsp settings.
-      utils.trigger_event("FileType")        -- This line starts this plugin.
+      utils.apply_lsp_diagnostic_defaults() -- Only needs to be called once.
+
+      -- Apply the lsp mappings to each client in each buffer.
+      vim.api.nvim_create_autocmd('LspAttach', {
+        callback = function(args)
+          local client = vim.lsp.get_client_by_id(args.data.client_id)
+          local bufnr = args.buf
+          if client and client.name then
+            utils.apply_user_lsp_mappings(client.name, bufnr)
+          end
+        end,
+      })
     end,
   },
 
   --  mason [lsp package manager]
-  --  https://github.com/williamboman/mason.nvim
+  --  https://github.com/mason-org/mason.nvim
   --  https://github.com/zeioth/mason-extra-cmds
   {
-    "williamboman/mason.nvim",
+    "mason-org/mason.nvim",
     dependencies = { "zeioth/mason-extra-cmds", opts = {} },
     cmd = {
       "Mason",
@@ -552,6 +559,7 @@ return {
           end, { "i", "s" }),
         },
         sources = cmp.config.sources {
+          -- Note: Priority decides the order items appear.
           { name = "nvim_lsp", priority = 1000 },
           { name = "lazydev",  priority = 850 },
           { name = "luasnip",  priority = 750 },

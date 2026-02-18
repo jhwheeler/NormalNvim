@@ -26,7 +26,7 @@
 --       -> smart-splits.nvim
 --       -> aerial.nvim
 --       -> litee-calltree.nvim
---       -> telescope.nivm                     [find]
+--       -> telescope.nvim                     [find]
 --       -> toggleterm.nvim
 --       -> dap.nvim                           [debugger]
 --       -> tests                              [tests]
@@ -187,13 +187,13 @@ maps.n["<leader>pU"] =
 { function() require("lazy").update() end, desc = "Lazy update" }
 
 -- mason
-if is_available "mason.nvim" then
+if is_available("mason.nvim") then
   maps.n["<leader>pm"] = { "<cmd>Mason<cr>", desc = "Mason open" }
   maps.n["<leader>pM"] = { "<cmd>MasonUpdateAll<cr>", desc = "Mason update" }
 end
 
 -- treesitter
-if is_available "nvim-treesitter" then
+if is_available("nvim-treesitter") then
   maps.n["<leader>pT"] = { "<cmd>TSUpdate<cr>", desc = "Treesitter update" }
   maps.n["<leader>pt"] = { "<cmd>TSInstallInfo<cr>", desc = "Treesitter open" }
 end
@@ -211,6 +211,12 @@ maps.n["<leader>c"] = { -- Close window and buffer at the same time.
 maps.n["<leader>C"] = { -- Close buffer keeping the window.
   function() require("heirline-components.buffer").close() end,
   desc = "Close buffer",
+}
+maps.n["<leader>bw"] = {     -- Closes the window
+  function()
+    vim.cmd("silent! close") -- Be aware you can't close the last window
+  end,
+  desc = "Close window",
 }
 -- Close buffer keeping the window → Without confirmation.
 -- maps.n["<leader>X"] = {
@@ -319,7 +325,7 @@ maps.n["<leader>b|"] = {
   desc = "Vertical split buffer from tabline",
 }
 
--- quick movement aliases
+-- quick buffer switching
 maps.n["<C-k>"] = {
   function()
     require("heirline-components.buffer").nav(vim.v.count > 0 and vim.v.count or 1)
@@ -332,27 +338,19 @@ maps.n["<C-j>"] = {
   end,
   desc = "Previous buffer",
 }
-maps.n["<S-Down>"] = {
-  function() vim.api.nvim_feedkeys("5j", "n", true) end,
-  desc = "Fast move down",
-}
-maps.n["<S-Up>"] = {
-  function() vim.api.nvim_feedkeys("5k", "n", true) end,
-  desc = "Fast move up",
-}
 
 -- ui toggles [ui] ---------------------------------------------------------
 maps.n["<leader>u"] = icons.u
-if is_available "nvim-autopairs" then
+if is_available("nvim-autopairs") then
   maps.n["<leader>ua"] = { ui.toggle_autopairs, desc = "Autopairs" }
 end
 maps.n["<leader>ub"] = { ui.toggle_background, desc = "Background" }
-if is_available "nvim-cmp" then
+if is_available("nvim-cmp") then
   maps.n["<leader>uc"] = { ui.toggle_cmp, desc = "Autocompletion" }
 end
-if is_available "nvim-colorizer.lua" then
+if is_available("nvim-highlight-colors") then
   maps.n["<leader>uC"] =
-  { "<cmd>ColorizerToggle<cr>", desc = "color highlight" }
+  { "<cmd>HighlightColors toggle<cr>", desc = "Color highlight" }
 end
 maps.n["<leader>ud"] = { ui.toggle_diagnostics, desc = "Diagnostics" }
 maps.n["<leader>uD"] = { ui.set_indent, desc = "Change indent setting" }
@@ -369,10 +367,10 @@ maps.n["<leader>uy"] = { ui.toggle_buffer_syntax, desc = "Syntax highlight (buff
 maps.n["<leader>uh"] = { ui.toggle_foldcolumn, desc = "Foldcolumn" }
 maps.n["<leader>uN"] =
 { ui.toggle_ui_notifications, desc = "UI notifications" }
-if is_available "lsp_signature.nvim" then
+if is_available("lsp_signature.nvim") then
   maps.n["<leader>up"] = { ui.toggle_lsp_signature, desc = "LSP signature" }
 end
-if is_available "mini.animate" then
+if is_available("mini.animate") then
   maps.n["<leader>uA"] = { ui.toggle_animations, desc = "Animations" }
 end
 
@@ -433,12 +431,12 @@ vim.api.nvim_create_autocmd("CmdwinEnter", {
 -- -------------------------------------------------------------------------
 
 -- alpha-nvim --------------------------------------------------------------
-if is_available "alpha-nvim" then
+if is_available("alpha-nvim") then
   maps.n["<leader>h"] = {
     function()
       local wins = vim.api.nvim_tabpage_list_wins(0)
       if #wins > 1
-          and vim.api.nvim_get_option_value("filetype", { win = wins[1] })
+          and vim.api.nvim_get_option_value("filetype", {})
           == "neo-tree"
       then
         vim.fn.win_gotoid(wins[2]) -- go to non-neo-tree window to toggle alpha
@@ -453,12 +451,12 @@ end
 -- [git] -----------------------------------------------------------
 -- gitsigns.nvim
 maps.n["<leader>g"] = icons.g
-if is_available "gitsigns.nvim" then
+if is_available("gitsigns.nvim") then
   maps.n["<leader>g"] = icons.g
   maps.n["]g"] =
-  { function() require("gitsigns").next_hunk() end, desc = "Next Git hunk" }
+  { function() require("gitsigns").nav_hunk('next') end, desc = "Next Git hunk" }
   maps.n["[g"] = {
-    function() require("gitsigns").prev_hunk() end,
+    function() require("gitsigns").nav_hunk('prev') end,
     desc = "Previous Git hunk",
   }
   maps.n["<leader>gl"] = {
@@ -499,7 +497,7 @@ if is_available "gitsigns.nvim" then
   }
 end
 -- git fugitive
-if is_available "vim-fugitive" then
+if is_available("vim-fugitive") then
   maps.n["<leader>gP"] = {
     function() vim.cmd(":GBrowse") end,
     desc = "Open in github ",
@@ -532,7 +530,7 @@ end
 
 -- file browsers ------------------------------------
 -- yazi
-if is_available "yazi.nvim" and vim.fn.executable("yazi") == 1 then
+if is_available("yazi.nvim") and vim.fn.executable("yazi") == 1 then
   maps.n["<leader>r"] = {
     -- TODO: use 'Yazi toggle' instead once yazi v0.4.0 is released.
     "<cmd>Yazi<CR>",
@@ -541,12 +539,12 @@ if is_available "yazi.nvim" and vim.fn.executable("yazi") == 1 then
 end
 
 -- neotree
-if is_available "neo-tree.nvim" then
+if is_available("neo-tree.nvim") then
   maps.n["<leader>e"] = { "<cmd>Neotree toggle<cr>", desc = "Neotree" }
 end
 
 -- session manager ---------------------------------------------------------
-if is_available "neovim-session-manager" then
+if is_available("neovim-session-manager") then
   maps.n["<leader>S"] = icons.S
   maps.n["<leader>Sl"] = {
     "<cmd>SessionManager! load_last_session<cr>",
@@ -565,7 +563,7 @@ if is_available "neovim-session-manager" then
     desc = "Load current directory session",
   }
 end
-if is_available "resession.nvim" then
+if is_available("resession.nvim") then
   maps.n["<leader>S"] = icons.S
   maps.n["<leader>Sl"] = {
     function() require("resession").load "Last Session" end,
@@ -589,8 +587,8 @@ if is_available "resession.nvim" then
   }
 end
 
--- smart-splits.nivm
-if is_available "smart-splits.nvim" then
+-- smart-splits.nvim
+if is_available("smart-splits.nvim") then
   maps.n["<C-h>"] = {
     function() require("smart-splits").move_cursor_left() end,
     desc = "Move to left split",
@@ -637,13 +635,13 @@ else
 end
 
 -- aerial.nvimm ------------------------------------------------------------
-if is_available "aerial.nvim" then
+if is_available("aerial.nvim") then
   maps.n["<leader>i"] =
   { function() require("aerial").toggle() end, desc = "Aerial" }
 end
 
 -- letee-calltree.nvimm ------------------------------------------------------------
-if is_available "litee-calltree.nvim" then
+if is_available("litee-calltree.nvim") then
   -- For every buffer, look for the one with filetype "calltree" and focus it.
   local calltree_delay = 1500 -- first run? wait a bit longer.
   local function focus_calltree()
@@ -679,7 +677,7 @@ if is_available "litee-calltree.nvim" then
 end
 
 -- telescope.nvim [find] ----------------------------------------------------
-if is_available "telescope.nvim" then
+if is_available("telescope.nvim") then
   maps.n["<leader>f"] = icons.f
   maps.n["<leader>gb"] = {
     function() require("telescope.builtin").git_branches() end,
@@ -753,7 +751,7 @@ if is_available "telescope.nvim" then
     function() require("telescope.builtin").man_pages() end,
     desc = "Find man",
   }
-  if is_available "nvim-notify" then
+  if is_available("nvim-notify") then
     maps.n["<leader>fn"] = {
       function() require("telescope").extensions.notify.notify() end,
       desc = "Find notifications",
@@ -786,11 +784,12 @@ if is_available "telescope.nvim" then
   }
   maps.n["<leader>fW"] = {
     function()
-      require("telescope.builtin").live_grep {
+      require("telescope.builtin").live_grep({
         additional_args = function(args)
-          return vim.list_extend(args, { "--hidden", "--no-ignore" })
+          args.additional_args = { "--hidden", "--no-ignore" }
+          return args.additional_args
         end,
-      }
+      })
     end,
     desc = "Find words in project",
   }
@@ -800,7 +799,7 @@ if is_available "telescope.nvim" then
   }
   maps.n["<leader>f/"] = {
     function() require("telescope.builtin").current_buffer_fuzzy_find() end,
-    desc = "Find words in current buffer"
+    desc = "Find words in current buffer",
   }
 
   -- Some lsp keymappings are here because they depend on telescope
@@ -829,7 +828,7 @@ if is_available "telescope.nvim" then
   }
 
   -- extra - project.nvim
-  if is_available "project.nvim" then
+  if is_available("project.nvim") then
     maps.n["<leader>fp"] = {
       function() vim.cmd("Telescope projects") end,
       desc = "Find project",
@@ -837,7 +836,7 @@ if is_available "telescope.nvim" then
   end
 
   -- extra - spectre.nvim (search and replace in project)
-  if is_available "nvim-spectre" then
+  if is_available("nvim-spectre") then
     maps.n["<leader>fr"] = {
       function() require("spectre").toggle() end,
       desc = "Find and replace word in project",
@@ -849,7 +848,7 @@ if is_available "telescope.nvim" then
   end
 
   -- extra - luasnip
-  if is_available "LuaSnip" and is_available "telescope-luasnip.nvim" then
+  if is_available("LuaSnip") and is_available("telescope-luasnip.nvim") then
     maps.n["<leader>fs"] = {
       function() require("telescope").extensions.luasnip.luasnip {} end,
       desc = "Find snippets",
@@ -858,7 +857,7 @@ if is_available "telescope.nvim" then
 
   -- extra - nvim-neoclip (neovim internal clipboard)
   --         Specially useful if you disable the shared clipboard in options.
-  if is_available "nvim-neoclip.lua" then
+  if is_available("nvim-neoclip.lua") then
     maps.n["<leader>fy"] = {
       function() require("telescope").extensions.neoclip.default() end,
       desc = "Find yank history",
@@ -870,7 +869,7 @@ if is_available "telescope.nvim" then
   end
 
   -- extra - undotree
-  if is_available "telescope-undo.nvim" then
+  if is_available("telescope-undo.nvim") then
     maps.n["<leader>fu"] = {
       function() require("telescope").extensions.undo.undo() end,
       desc = "Find in undo tree",
@@ -878,7 +877,7 @@ if is_available "telescope.nvim" then
   end
 
   -- extra - compiler
-  if is_available "compiler.nvim" and is_available "overseer.nvim" then
+  if is_available("compiler.nvim") and is_available("overseer.nvim") then
     maps.n["<leader>m"] = icons.c
     maps.n["<leader>mm"] = {
       function() vim.cmd("CompilerOpen") end,
@@ -908,7 +907,7 @@ if is_available "telescope.nvim" then
 end
 
 -- toggleterm.nvim ----------------------------------------------------------
-if is_available "toggleterm.nvim" then
+if is_available("toggleterm.nvim") then
   maps.n["<leader>t"] = icons.t
   maps.n["<leader>tt"] =
   { "<cmd>ToggleTerm direction=float<cr>", desc = "ToggleTerm float" }
@@ -940,7 +939,7 @@ maps.t["<C-l>"] =
 -- Depending your terminal some F keys may not work. To fix it:
 -- modified function keys found with `showkey -a` in the terminal to get key code
 -- run `nvim -V3log +quit` and search through the "Terminal info" in the `log` file for the correct keyname
-if is_available "nvim-dap" then
+if is_available("nvim-dap") then
   maps.n["<leader>d"] = icons.d
   maps.x["<leader>d"] = icons.d
 
@@ -1016,7 +1015,7 @@ if is_available "nvim-dap" then
   maps.n["<leader>ds"] =
   { function() require("dap").run_to_cursor() end, desc = "Run To Cursor" }
 
-  if is_available "nvim-dap-ui" then
+  if is_available("nvim-dap-ui") then
     maps.n["<leader>dE"] = {
       function()
         vim.ui.input({ prompt = "Expression: " }, function(expr)
@@ -1040,7 +1039,7 @@ end
 -- neotest
 maps.n["<leader>T"] = icons.tt
 maps.x["<leader>T"] = icons.tt
-if is_available "neotest" then
+if is_available("neotest") then
   maps.n["<leader>Tu"] = {
     function() require("neotest").run.run() end,
     desc = "Unit",
@@ -1075,7 +1074,7 @@ end
 --
 --         If you use other framework or language, refer to nvim-coverage docs:
 --         https://github.com/andythigpen/nvim-coverage/blob/main/doc/nvim-coverage.txt
-if is_available "nvim-coverage" then
+if is_available("nvim-coverage") then
   maps.n["<leader>Tc"] = {
     function()
       require("coverage").load(false)
@@ -1102,7 +1101,7 @@ maps.n["<leader>Te"] = {
 }
 
 -- nvim-ufo [code folding] --------------------------------------------------
-if is_available "nvim-ufo" then
+if is_available("nvim-ufo") then
   maps.n["zR"] =
   { function() require("ufo").openAllFolds() end, desc = "Open all folds" }
   maps.n["zM"] =
@@ -1131,19 +1130,19 @@ end
 
 -- code docmentation [docs] -------------------------------------------------
 
-if is_available "markdown-preview.nivm" or is_available "markmap.nvim" or is_available "dooku.nvim" then
+if is_available("markdown-preview.nvim") or is_available("markmap.nvim") or is_available("dooku.nvim") then
   maps.n["<leader>D"] = icons.dc
 
   -- Markdown preview
-  if is_available "markdown-preview.nvim" then
+  if is_available("markdown-preview.nvim") then
     maps.n["<leader>Dp"] = {
-      function() vim.cmd("MarkdownPreview") end,
+      function() vim.cmd("silent! MarkdownPreview") end,
       desc = "Markdown preview",
     }
   end
 
   -- Markdown Mindmap
-  if is_available "markmap.nvim" then
+  if is_available("markmap.nvim") then
     maps.n["<leader>Dm"] = {
       function()
         if is_android then
@@ -1156,7 +1155,7 @@ if is_available "markdown-preview.nivm" or is_available "markmap.nvim" or is_ava
     }
   end
 
-  if is_available "dooku.nvim" then
+  if is_available("dooku.nvim") then
     maps.n["<leader>Dd"] = {
       function() vim.cmd(":DookuGenerate") end,
       desc = "Open documentation",
@@ -1165,21 +1164,24 @@ if is_available "markdown-preview.nivm" or is_available "markmap.nvim" or is_ava
 end
 
 
-
 -- mason-lspconfig.nvim [lsp] -------------------------------------------------
 -- WARNING: Don't delete this section, or you won't have LSP keymappings.
 
 --A function we call from the script to start lsp.
 --@return table lsp_mappings
 function M.lsp_mappings(client, bufnr)
-  -- Helper function to check if any active LSP clients
-  -- given a filter provide a specific capability.
+  -- Helper function to check if a lsp client implements a certain method.
+  --
+  -- Wrapper for `client:supports_method()` to avoid code repetition.
   -- @param capability string The server capability to check for (example: "documentFormattingProvider").
-  -- @param filter vim.lsp.get_clients.filter|nil A valid get_clients filter (see function docs).
+  -- @param filter? vim.lsp.get_clients.filter|nil A valid get_clients filter (see function docs).
   -- @return boolean # `true` if any of the clients provide the capability.
-  local function has_capability(capability, filter)
+  local function supports_method(method, filter)
+    -- default filter: current buffer.
+    if not filter then filter = { bufnr = bufnr } end
+
     for _, lsp_client in ipairs(vim.lsp.get_clients(filter)) do
-      if lsp_client.supports_method(capability) then return true end
+      if lsp_client:supports_method(method) then return true end
     end
     return false
   end
@@ -1187,31 +1189,31 @@ function M.lsp_mappings(client, bufnr)
   local lsp_mappings = require("base.utils").get_mappings_template()
 
   -- Diagnostics
-  lsp_mappings.n["<leader>ld"] = { function() vim.diagnostic.open_float() end, desc = "Hover diagnostics" }
-  lsp_mappings.n["[d"] = { function()
-      -- TODO: Delete after dropping nvim 0.10 support.
-      if vim.fn.has('nvim-0.11') == 1 then vim.diagnostic.jump({ count = -1 })
-      else vim.diagnostic.goto_prev() end end, desc = "Previous diagnostic"
+  lsp_mappings.n["<leader>ld"] =
+  { function() vim.diagnostic.open_float() end, desc = "Hover diagnostics" }
+  lsp_mappings.n["[d"] = {
+    function() vim.diagnostic.jump({ count = -1 }) end,
+    desc = "Previous diagnostic",
   }
-  lsp_mappings.n["]d"] = { function()
-    -- TODO: Delete after dropping nvim 0.10 support.
-    if vim.fn.has('nvim-0.11') == 1 then vim.diagnostic.jump({ count = 1 })
-    else vim.diagnostic.goto_next() end end, desc = "Next diagnostic" }
+  lsp_mappings.n["]d"] = {
+    function() vim.diagnostic.jump({ count = 1 }) end,
+    desc = "Next diagnostic",
+  }
 
   -- Diagnostics
   lsp_mappings.n["gl"] = { function() vim.diagnostic.open_float() end, desc = "Hover diagnostics" }
-  if is_available "telescope.nvim" then
+  if is_available("telescope.nvim") then
     lsp_mappings.n["<leader>lD"] =
       { function() require("telescope.builtin").diagnostics() end, desc = "Diagnostics" }
   end
 
   -- LSP info
-  if is_available "mason-lspconfig.nvim" then
+  if is_available("mason-lspconfig.nvim") then
     lsp_mappings.n["<leader>li"] = { "<cmd>LspInfo<cr>", desc = "LSP information" }
   end
 
-  if is_available "none-ls.nvim" then
-    lsp_mappings.n["<leader>lI"] = { "<cmd>NullLsInfo<cr>", desc = "Null-ls information" }
+  if is_available("none-ls.nvim") then
+    lsp_mappings.n["<leader>lI"] = { "<cmd>NullLsInfo<cr>", desc = "None-ls information" }
   end
 
   -- Code actions
@@ -1226,12 +1228,12 @@ function M.lsp_mappings(client, bufnr)
     events = { "InsertLeave" },
     desc = "Refresh codelens",
     callback = function(args)
-      if client.supports_method "textDocument/codeLens" then
+      if supports_method("textDocument/codeLens") then
         if vim.g.codelens_enabled then vim.lsp.codelens.refresh({ bufnr = args.buf }) end
       end
     end,
   })
-  if client.supports_method "textDocument/codeLens" then -- on LspAttach
+  if supports_method("textDocument/codeLens") then -- on LspAttach
     if vim.g.codelens_enabled then vim.lsp.codelens.refresh({ bufnr = 0 }) end
   end
 
@@ -1248,8 +1250,10 @@ function M.lsp_mappings(client, bufnr)
   }
 
   -- Formatting (keymapping)
-  local formatting = require("base.utils.lsp").formatting
-  local format_opts = require("base.utils.lsp").format_opts
+  local format_opts = {
+    format_on_save = { enabled = vim.g.autoformat_enabled or false },
+    disabled = {} -- You can disable formatting for desired lsp clients.
+  }
   lsp_mappings.n["<leader>lf"] = {
     function()
       vim.lsp.buf.format(format_opts)
@@ -1268,55 +1272,41 @@ function M.lsp_mappings(client, bufnr)
   )
 
   -- Autoformatting (autocmd)
-  local autoformat = formatting.format_on_save
-  local filetype = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
+  utils.add_autocmds_to_buffer("lsp_auto_format", bufnr, {
+    events = "BufWritePre", -- Trigger before save
+    desc = "Autoformat on save",
+    callback = function()
+      -- guard clause: supports_method
+      if
+          not supports_method("textDocument/formatting", { bufnr = bufnr })
+      then
+        utils.del_autocmds_from_buffer("lsp_auto_format", bufnr)
+        return
+      end
 
-  -- guard clauses
-  local is_autoformat_enabled = autoformat.enabled
-  local is_filetype_allowed = vim.tbl_isempty(autoformat.allow_filetypes or {})
-      or vim.tbl_contains(autoformat.allow_filetypes, filetype)
-  local is_filetype_ignored = vim.tbl_isempty(
-    autoformat.ignore_filetypes or {}
-  ) or not vim.tbl_contains(autoformat.ignore_filetypes, filetype)
+      -- Get autoformat setting (buffer or global)
+      local autoformat_enabled = vim.b.autoformat_enabled
+          or vim.g.autoformat_enabled
+      local has_no_filter = not format_opts.filter
+      local passes_filter = format_opts.filter and format_opts.filter(bufnr)
 
-if is_autoformat_enabled and is_filetype_allowed and is_filetype_ignored then
-    utils.add_autocmds_to_buffer("lsp_auto_format", bufnr, {
-      events = "BufWritePre", -- Trigger before save
-      desc = "Autoformat on save",
-      callback = function()
-        -- guard clause: has_capability
-        if
-            not has_capability("textDocument/formatting", { bufnr = bufnr })
-        then
-          utils.del_autocmds_from_buffer("lsp_auto_format", bufnr)
-          return
-        end
+      -- Use these variables in the if condition
+      if autoformat_enabled and (has_no_filter or passes_filter) then
+        local affected_bufnr = vim.tbl_deep_extend("force", format_opts, { bufnr = bufnr })
+        vim.lsp.buf.format(affected_bufnr)
+      end
+    end,
+  })
 
-        -- Get autoformat setting (buffer or global)
-        local autoformat_enabled = vim.b.autoformat_enabled
-            or vim.g.autoformat_enabled
-        local has_no_filter = not autoformat.filter
-        local passes_filter = autoformat.filter and autoformat.filter(bufnr)
-
-        -- Use these variables in the if condition
-        if autoformat_enabled and (has_no_filter or passes_filter) then
-          vim.lsp.buf.format(
-            vim.tbl_deep_extend("force", format_opts, { bufnr = bufnr })
-          )
-        end
-      end,
-    })
-
-    -- Key mappings for toggling autoformat (buffer/global)
-    lsp_mappings.n["<leader>uf"] = {
-      function() require("base.utils.ui").toggle_buffer_autoformat() end,
-      desc = "Toggle buffer autoformat",
-    }
-    lsp_mappings.n["<leader>uF"] = {
-      function() require("base.utils.ui").toggle_autoformat() end,
-      desc = "Toggle global autoformat",
-    }
-  end
+  -- Key mappings for toggling autoformat (buffer/global)
+  lsp_mappings.n["<leader>uf"] = {
+    function() require("base.utils.ui").toggle_buffer_autoformat() end,
+    desc = "Autoformat (buffer)",
+  }
+  lsp_mappings.n["<leader>uF"] = {
+    function() require("base.utils.ui").toggle_autoformat() end,
+    desc = "Autoformat",
+  }
 
   -- Highlight references when cursor holds
   utils.add_autocmds_to_buffer("lsp_document_highlight", bufnr, {
@@ -1324,7 +1314,7 @@ if is_autoformat_enabled and is_filetype_allowed and is_filetype_ignored then
       events = { "CursorHold", "CursorHoldI" },
       desc = "highlight references when cursor holds",
       callback = function()
-        if has_capability("textDocument/documentHighlight", { bufnr = bufnr }) then
+        if supports_method("textDocument/documentHighlight") then
           vim.lsp.buf.document_highlight()
         end
       end,
@@ -1375,21 +1365,24 @@ if is_autoformat_enabled and is_filetype_allowed and is_filetype_ignored then
   }
 
   -- Goto help
+  local hover_opts = vim.g.lsp_round_borders_enabled and { border = "rounded", silent = true } or {}
   lsp_mappings.n["gh"] = {
-    function() vim.lsp.buf.hover() end,
+    function()
+      vim.lsp.buf.hover(hover_opts)
+    end,
     desc = "Hover help",
   }
   lsp_mappings.n["gH"] = {
-    function() vim.lsp.buf.signature_help() end,
+    function() vim.lsp.buf.signature_help(hover_opts) end,
     desc = "Signature help",
   }
 
   lsp_mappings.n["<leader>lh"] = {
-    function() vim.lsp.buf.hover() end,
+    function() vim.lsp.buf.hover(hover_opts) end,
     desc = "Hover help",
   }
   lsp_mappings.n["<leader>lH"] = {
-    function() vim.lsp.buf.signature_help() end,
+    function() vim.lsp.buf.signature_help(hover_opts) end,
     desc = "Signature help",
   }
 
@@ -1433,7 +1426,7 @@ if is_autoformat_enabled and is_filetype_allowed and is_filetype_ignored then
   lsp_mappings.n["gS"] = { function() vim.lsp.buf.workspace_symbol() end, desc = "Search symbol in workspace" }
 
   -- LSP telescope
-  if is_available "telescope.nvim" then -- setup telescope mappings if available
+  if is_available("telescope.nvim") then -- setup telescope mappings if available
     if lsp_mappings.n.gd then lsp_mappings.n.gd[1] = function() require("telescope.builtin").lsp_definitions() end end
     if lsp_mappings.n.gI then
       lsp_mappings.n.gI[1] = function() require("telescope.builtin").lsp_implementations() end

@@ -148,6 +148,7 @@ return {
         -- "Struct",
       },
       open_automatic = false, -- Open if the buffer is compatible
+      nerd_font = (vim.g.fallback_icons_enabled and false) or true,
       autojump = true,
       link_folds_to_tree = false,
       link_tree_to_folds = false,
@@ -204,6 +205,9 @@ return {
     event = "User BaseFile",
     opts = {
       notify = { enabled = false },
+      tree = {
+          icon_set = "default" -- "nerd", "codicons", "default", "simple"
+      },
       panel = {
         orientation = "bottom",
         panel_size = 10,
@@ -271,13 +275,24 @@ return {
   --  Note: If you change the build command, wipe ~/.local/data/nvim/lazy
   {
     "iamcco/markdown-preview.nvim",
-    build = function() vim.fn["mkdp#util#install"]() end,
-    ft = { "markdown" },
-    cmd = {
-      "MarkdownPreview",
-      "MarkdownPreviewStop",
-      "MarkdownPreviewToggle",
-    },
+    build = function(plugin)
+      -- guard clauses
+      local yarn = (vim.fn.executable("yarn") and "yarn")
+                   or (vim.fn.executable("npx") and "npx -y yarn")
+                   or nil
+      if not yarn then error("Missing `yarn` or `npx` in the PATH") end
+
+      -- run cmd
+      local cd_cmd = "!cd " .. plugin.dir .. " && cd app"
+      local yarn_install_cmd = "COREPACK_ENABLE_AUTO_PIN=0 " .. yarn .. " install --frozen-lockfile"
+      vim.cmd(cd_cmd .. " && " .. yarn_install_cmd)
+    end,
+    init = function()
+      local plugin = require("lazy.core.config").spec.plugins["markdown-preview.nvim"]
+      vim.g.mkdp_filetypes = require("lazy.core.plugin").values(plugin, "ft", true)
+    end,
+    ft = { "markdown", "markdown.mdx" },
+    cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
   },
 
   --  [markdown markmap]
@@ -567,7 +582,7 @@ return {
   --  If you use other framework or language, refer to nvim-coverage docs:
   --  https://github.com/andythigpen/nvim-coverage/blob/main/doc/nvim-coverage.txt
   {
-    "zeioth/nvim-coverage", -- Our fork until all our PRs are merged.
+    "andythigpen/nvim-coverage",
     cmd = {
       "Coverage",
       "CoverageLoad",

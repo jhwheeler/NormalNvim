@@ -29,8 +29,9 @@ local function git_clone_lazy(lazy_dir)
     lazy_dir,
   })
   if vim.api.nvim_get_vvar("shell_error") ~= 0 then
-    vim.api.nvim_err_writeln(
-      "Error cloning lazy.nvim repository...\n\n" .. output
+    vim.api.nvim_echo(
+      {{"Error cloning lazy.nvim repository...\n\n" .. output}},
+      true, {err = true}
     )
   end
 end
@@ -56,8 +57,8 @@ local function after_installing_plugins_load(plugins)
   })
 end
 
---- load `<config_dir>/lua/lazy_snapshot.lua` and return it as table).
---- @return spec table # A table you can pass to the `spec` option of lazy.
+--- load `<config_dir>/lua/lazy_snapshot.lua` and return it as table.
+--- @return table spec A table you can pass to the `spec` option of lazy.
 local function get_lazy_spec()
   local snapshot_filename = vim.fn.fnamemodify(updates_config.snapshot_file, ":t:r")
   local pin_plugins = updates_config.channel == "stable"

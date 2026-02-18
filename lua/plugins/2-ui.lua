@@ -32,7 +32,6 @@ return {
     "folke/tokyonight.nvim",
     event = "User LoadColorSchemes",
     opts = {
-      cache = true, -- disable this if your UI is rendered incorrectly.
       dim_inactive = false,
       styles = {
         comments = { italic = true },
@@ -121,6 +120,7 @@ return {
         desc = "Add Alpha dashboard footer",
         once = true,
         callback = function()
+          local  footer_icon = require("base.utils").get_icon("GreeterPlug")
           local stats = require("lazy").stats()
           stats.real_cputime = not is_windows
           local ms = math.floor(stats.startuptime * 100 + 0.5) / 100
@@ -128,11 +128,11 @@ return {
             " ",
             " ",
             " ",
-            "Loaded " .. stats.loaded .. " plugins  in " .. ms .. "ms",
+            "Loaded " .. stats.loaded .. " plugins " .. footer_icon .. " in " .. ms .. "ms",
             ".............................",
           }
           opts.section.footer.opts.hl = "DashboardFooter"
-          vim.cmd "highlight DashboardFooter guifg=#D29B68"
+          vim.cmd("highlight DashboardFooter guifg=#D29B68")
           pcall(vim.cmd.AlphaRedraw)
         end,
       })
@@ -229,7 +229,7 @@ return {
       -- return different items depending of the value of `vim.g.fallback_icons_enabled`
       local function get_icons()
         if vim.g.fallback_icons_enabled then
-          return require("base.icons.fallback_icons_enabled")
+          return require("base.icons.fallback_icons")
         else
           return require("base.icons.icons")
         end
@@ -483,7 +483,7 @@ return {
     end
   },
 
-  --  UI icons [icons]
+  --  UI icons [icons - ui]
   --  https://github.com/nvim-tree/nvim-web-devicons
   {
     "nvim-tree/nvim-web-devicons",
@@ -492,29 +492,13 @@ return {
     opts = {
       override = {
         default_icon = {
-          icon = require("base.utils").get_icon("DefaultFile"),
-          name = "default"
+          icon = require("base.utils").get_icon("DefaultFile")
         },
-        deb = { icon = "", name = "Deb" },
-        lock = { icon = "󰌾", name = "Lock" },
-        mp3 = { icon = "󰎆", name = "Mp3" },
-        mp4 = { icon = "", name = "Mp4" },
-        out = { icon = "", name = "Out" },
-        ["robots.txt"] = { icon = "󰚩", name = "Robots" },
-        ttf = { icon = "", name = "TrueTypeFont" },
-        rpm = { icon = "", name = "Rpm" },
-        woff = { icon = "", name = "WebOpenFontFormat" },
-        woff2 = { icon = "", name = "WebOpenFontFormat2" },
-        xz = { icon = "", name = "Xz" },
-        zip = { icon = "", name = "Zip" },
       },
     },
-    config = function(_, opts)
-      require("nvim-web-devicons").setup(opts)
-    end
   },
 
-  --  LSP icons [icons]
+  --  LSP icons [icons | lsp]
   --  https://github.com/onsails/lspkind.nvim
   {
     "onsails/lspkind.nvim",
@@ -563,7 +547,7 @@ return {
         "noice",
         "prompt",
         "TelescopePrompt",
-        "alpha",
+        "alpha"
       },
     },
   },
@@ -615,15 +599,14 @@ return {
 
   --  highlight-undo
   --  https://github.com/tzachar/highlight-undo.nvim
-  --  This plugin only flases on redo.
+  --  This plugin only flases on undo/redo.
   --  But we also have a autocmd to flash on yank.
   {
     "tzachar/highlight-undo.nvim",
     event = "User BaseDefered",
     opts = {
       duration = 150,
-      undo = { hlgroup = 'IncSearch' },
-      redo = { hlgroup = 'IncSearch' },
+      hlgroup = "IncSearch",
     },
     config = function(_, opts)
       require("highlight-undo").setup(opts)
@@ -632,7 +615,9 @@ return {
       vim.api.nvim_create_autocmd("TextYankPost", {
         desc = "Highlight yanked text",
         pattern = "*",
-        callback = function() vim.highlight.on_yank() end,
+        callback = function()
+          (vim.hl or vim.highlight).on_yank()
+        end,
       })
     end,
   },

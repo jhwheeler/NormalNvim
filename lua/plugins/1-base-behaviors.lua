@@ -320,7 +320,7 @@ return {
             folder_empty_open = get_icon("FolderEmpty"),
             default = get_icon("DefaultFile"),
           },
-          modified = { symbol = get_icon "FileModified" },
+          modified = { symbol = get_icon("FileModified") },
           git_status = {
             symbols = {
               added = get_icon("GitAdd"),
@@ -429,7 +429,7 @@ return {
             ["<S-CR>"] = "system_open",
             ["[b"] = "prev_source",
             ["]b"] = "next_source",
-            F = utils.is_available "telescope.nvim" and "find_in_dir" or nil,
+            F = utils.is_available("telescope.nvim") and "find_in_dir" or nil,
             O = "system_open",
             Y = "copy_selector",
             h = "parent_or_close",
@@ -654,6 +654,5 @@ return {
         channel = "stable" -- stable/nightly
     }
   },
-
 
 } -- end of return

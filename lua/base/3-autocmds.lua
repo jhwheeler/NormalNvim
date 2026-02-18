@@ -35,8 +35,8 @@ autocmd({ "BufReadPost", "BufNewFile", "BufWritePost" }, {
   callback = function(args)
     local empty_buffer = vim.fn.resolve(vim.fn.expand "%") == ""
     local greeter = vim.api.nvim_get_option_value("filetype", { buf = args.buf }) == "alpha"
-    local git_repo = utils.run_cmd(
-    { "git", "-C", vim.fn.fnamemodify(vim.fn.resolve(vim.fn.expand "%"), ":p:h"), "rev-parse" }, false)
+    local git_repo = vim.fn.executable("git") == 1 and utils.run_cmd(
+      { "git", "-C", vim.fn.fnamemodify(vim.fn.resolve(vim.fn.expand "%"), ":p:h"), "rev-parse" }, false)
 
     -- For any file exept empty buffer, or the greeter (alpha)
     if not (empty_buffer or greeter) then
@@ -197,18 +197,6 @@ autocmd("BufWritePre", {
   end,
 })
 
--- 5b. Apply LSP keymappings when an LSP client attaches to a buffer.
---     (mason-lspconfig v2 removed `handlers`, so on_attach from
---      apply_user_lsp_settings is no longer called automatically.)
-autocmd("LspAttach", {
-  desc = "Apply user LSP keymappings on LspAttach",
-  callback = function(args)
-    local client = vim.lsp.get_client_by_id(args.data.client_id)
-    if client then
-      require("base.utils.lsp").apply_user_lsp_mappings(client, args.buf)
-    end
-  end,
-})
 
 -- ## COOL HACKS ------------------------------------------------------------
 -- 6. Effect: URL underline.
@@ -222,13 +210,16 @@ autocmd({ "VimEnter", "FileType", "BufEnter", "WinEnter" }, {
 autocmd("VimEnter", {
   desc = "Disable right contextual menu warning message",
   callback = function()
-    -- Disable right click message
+    -- Revome from menu
     vim.api.nvim_command [[aunmenu PopUp.How-to\ disable\ mouse]]
-    -- vim.api.nvim_command [[aunmenu PopUp.-1-]] -- You can remode a separator like this.
+    vim.api.nvim_command [[aunmenu PopUp.Inspect]]
+    vim.api.nvim_command [[aunmenu PopUp.-1-]] -- You can remove a separator like this.
+
+    -- Add to menu
+    vim.api.nvim_command [[menu PopUp.Format\ \Code <cmd>silent! Format<CR>]]
+    vim.api.nvim_command [[menu PopUp.-1- <Nop>]]
     vim.api.nvim_command [[menu PopUp.Toggle\ \Breakpoint <cmd>:lua require('dap').toggle_breakpoint()<CR>]]
-    vim.api.nvim_command [[menu PopUp.-2- <Nop>]]
-    vim.api.nvim_command [[menu PopUp.Start\ \Compiler <cmd>:CompilerOpen<CR>]]
-    vim.api.nvim_command [[menu PopUp.Start\ \Debugger <cmd>:DapContinue<CR>]]
+    vim.api.nvim_command [[menu PopUp.Debugger\ \Continue <cmd>:DapContinue<CR>]]
     vim.api.nvim_command [[menu PopUp.Run\ \Test <cmd>:Neotest run<CR>]]
   end,
 })

@@ -189,7 +189,7 @@ return {
   -- v2: uses `automatic_enable` (default true) + vim.lsp.config() instead of handlers.
   {
     "mason-org/mason-lspconfig.nvim",
-    dependencies = { "neovim/nvim-lspconfig" },
+    dependencies = { "neovim/nvim-lspconfig", "mason-org/mason.nvim" },
     event = "User BaseFile",
     opts = {
       automatic_enable = true,
@@ -203,6 +203,7 @@ return {
         "jsonls",
         "tailwindcss",
         "eslint",
+        "bashls",
       },
     },
     config = function(_, opts)

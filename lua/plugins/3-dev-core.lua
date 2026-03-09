@@ -52,6 +52,26 @@ return {
     build = ":TSUpdate",
     opts = {
       auto_install = false, -- Currently bugged. Use [:TSInstall all] and [:TSUpdate all]
+      ensure_installed = {
+        "svelte",
+        "typescript",
+        "javascript",
+        "tsx",
+        "html",
+        "css",
+        "json",
+        "lua",
+        "go",
+        "gomod",
+        "gosum",
+        "bash",
+        "markdown",
+        "markdown_inline",
+        "yaml",
+        "regex",
+        "vim",
+        "vimdoc",
+      },
 
       highlight = {
         enable = true,

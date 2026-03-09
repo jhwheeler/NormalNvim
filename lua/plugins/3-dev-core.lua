@@ -193,6 +193,17 @@ return {
     event = "User BaseFile",
     opts = {
       automatic_enable = true,
+      ensure_installed = {
+        "ts_ls",
+        "svelte",
+        "lua_ls",
+        "gopls",
+        "cssls",
+        "html",
+        "jsonls",
+        "tailwindcss",
+        "eslint",
+      },
     },
     config = function(_, opts)
       require("mason-lspconfig").setup(opts)

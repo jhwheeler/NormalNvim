@@ -42,7 +42,6 @@ return {
         ".bzr",
         ".svn",
         "Makefile",
-        "package.json",
         ".solution",
         ".solution.toml"
       },

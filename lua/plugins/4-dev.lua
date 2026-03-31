@@ -206,7 +206,7 @@ return {
     opts = {
       notify = { enabled = false },
       tree = {
-          icon_set = "default" -- "nerd", "codicons", "default", "simple"
+        icon_set = "default" -- "nerd", "codicons", "default", "simple"
       },
       panel = {
         orientation = "bottom",
@@ -278,8 +278,8 @@ return {
     build = function(plugin)
       -- guard clauses
       local yarn = (vim.fn.executable("yarn") and "yarn")
-                   or (vim.fn.executable("npx") and "npx -y yarn")
-                   or nil
+          or (vim.fn.executable("npx") and "npx -y yarn")
+          or nil
       if not yarn then error("Missing `yarn` or `npx` in the PATH") end
 
       -- run cmd
@@ -461,7 +461,6 @@ return {
           terminalKind = "integrated",
         }
       }
-
     end, -- of dap config
     dependencies = {
       "rcarriga/nvim-dap-ui",
@@ -620,7 +619,7 @@ return {
       local cwd = vim.uv.cwd()
       local basename = vim.fs.basename(cwd)
       _99.setup({
-        -- provider = _99.ClaudeCodeProvider,  -- default: OpenCodeProvider
+        provider = _99.ClaudeCodeProvider, -- default: OpenCodeProvider
         logger = {
           level = _99.DEBUG,
           path = "/tmp/" .. basename .. ".99.debug",
@@ -721,6 +720,55 @@ return {
       -- Diff management
       { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept diff" },
       { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>",   desc = "Deny diff" },
+    },
+  },
+  {
+    'kkrampis/codex.nvim',
+    lazy = true,
+    cmd = { 'Codex', 'CodexToggle' }, -- Optional: Load only on command execution
+    keys = {
+      {
+        '<leader>cc', -- Change this to your preferred keybinding
+        function()
+          local codex = require 'codex'
+          codex.setup { cmd = { 'codex', '--no-alt-screen' } }
+          codex.toggle()
+        end,
+        desc = 'Toggle Codex popup or side-panel',
+        mode = { 'n', 't' }
+      },
+      {
+        '<leader>cr',
+        function()
+          local codex = require 'codex'
+          local state = require 'codex.state'
+
+          -- Restart with resume picker command so codex.nvim opens in its panel.
+          if state.job then
+            vim.fn.jobstop(state.job)
+            state.job = nil
+          end
+
+          codex.close()
+          codex.setup { cmd = { 'codex', '--no-alt-screen', 'resume' } }
+          codex.open()
+          vim.cmd 'startinsert'
+        end,
+        desc = 'Resume Codex',
+        mode = 'n',
+      },
+    },
+    opts = {
+      keymaps     = {
+        toggle = nil,      -- Keybind to toggle Codex window (Disabled by default, watch out for conflicts)
+        quit = '<C-q>',    -- Keybind to close the Codex window (default: Ctrl + q)
+      },                   -- Disable internal default keymap (<leader>cc -> :CodexToggle)
+      width       = 0.4,   -- Width of the floating window (0.0 to 1.0)
+      height      = 0.8,   -- Height of the floating window (0.0 to 1.0)
+      model       = nil,   -- Optional: pass a string to use a specific model (e.g., 'o3-mini')
+      autoinstall = true,  -- Automatically install the Codex CLI if not found
+      panel       = true,  -- Open Codex in a side-panel (vertical split) instead of floating window
+      use_buffer  = false, -- Capture Codex stdout into a normal buffer instead of a terminal buffer
     },
   },
   {

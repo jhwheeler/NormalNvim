@@ -508,8 +508,9 @@ if vim.fn.executable "lazygit" == 1 then -- if lazygit exists, show it
   local lazygit_term
   maps.n["<leader>gg"] = {
     function()
-      local git_dir = vim.fn.finddir(".git", vim.fn.getcwd() .. ";")
-      if git_dir ~= "" then
+      local is_git_repo = utils.run_cmd(
+        { "git", "-C", vim.fn.getcwd(), "rev-parse" }, false)
+      if is_git_repo then
         if not lazygit_term then
           local Terminal = require("toggleterm.terminal").Terminal
           lazygit_term = Terminal:new({
@@ -930,14 +931,27 @@ if is_available("toggleterm.nvim") then
 end
 
 -- extra - improved terminal navigation
-maps.t["<C-h>"] =
-{ "<cmd>wincmd h<cr>", desc = "Terminal left window navigation" }
-maps.t["<C-j>"] =
-{ "<cmd>wincmd j<cr>", desc = "Terminal down window navigation" }
-maps.t["<C-k>"] =
-{ "<cmd>wincmd k<cr>", desc = "Terminal up window navigation" }
-maps.t["<C-l>"] =
-{ "<cmd>wincmd l<cr>", desc = "Terminal right window navigation" }
+maps.t["<Esc><Esc>"] = {
+  [[<C-\><C-n>]],
+  desc = "Exit terminal insert mode",
+}
+
+maps.t["<C-h>"] = {
+  [[<C-\><C-n><C-h>]],
+  desc = "Terminal left window navigation",
+}
+maps.t["<C-j>"] = {
+  [[<C-\><C-n><C-j>]],
+  desc = "Terminal down window navigation",
+}
+maps.t["<C-k>"] = {
+  [[<C-\><C-n><C-k>]],
+  desc = "Terminal up window navigation",
+}
+maps.t["<C-l>"] = {
+  [[<C-\><C-n><C-l>]],
+  desc = "Terminal right window navigation",
+}
 
 -- dap.nvim [debugger] -----------------------------------------------------
 -- Depending your terminal some F keys may not work. To fix it:

@@ -193,6 +193,7 @@ return {
     event = "User BaseFile",
     opts = {
       automatic_enable = true,
+      ensure_installed = { "ts_ls", "svelte" },
     },
     config = function(_, opts)
       require("mason-lspconfig").setup(opts)
@@ -237,7 +238,6 @@ return {
           package_pending = require("base.utils").get_icon("MasonPending"),
         },
       },
-      opts = { ensure_installed = { "prettier" } },
     }
   },
 
@@ -275,7 +275,7 @@ return {
       },
       format_on_save = {
         timeout_ms = 5000,
-        lsp_fallback = true,
+        lsp_format = "fallback",
       },
       formatters = {
         shfmt = {

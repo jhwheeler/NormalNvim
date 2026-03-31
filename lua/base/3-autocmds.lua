@@ -17,8 +17,11 @@
 --       -> 8. Unlist quickfix buffers if the filetype changes.
 --       -> 9. Close all notifications on BufWritePre.
 --
+--       ## FILE NAVIGATION
+--       -> 10. Configure gf for JS/TS/Svelte/Go projects.
+--
 --       ## COMMANDS
---       -> 10. Neotest commands.
+--       -> 11. Neotest commands.
 --       ->     Extra commands.
 
 local autocmd = vim.api.nvim_create_autocmd
@@ -239,9 +242,32 @@ autocmd("BufWritePre", {
   end,
 })
 
+-- ## FILE NAVIGATION -------------------------------------------------------
+-- 10. Configure `gf` for JS/TS/Svelte/Go projects.
+autocmd("FileType", {
+  desc = "Set suffixesadd and path for gf in web filetypes",
+  pattern = { "javascript", "javascriptreact", "typescript", "typescriptreact", "svelte", "vue" },
+  callback = function()
+    vim.opt_local.suffixesadd:prepend(".svelte,.ts,.tsx,.js,.jsx,.mjs,.cjs,.json,/index.ts,/index.js,/index.svelte")
+    vim.opt_local.path:append("src,src/**")
+
+    -- Resolve SvelteKit $lib/... and other $ aliases to real paths.
+    vim.opt_local.includeexpr = "v:lua.require('base.gf').resolve(v:fname)"
+  end,
+})
+
+autocmd("FileType", {
+  desc = "Set suffixesadd, path, and includeexpr for gf in Go files",
+  pattern = { "go" },
+  callback = function()
+    vim.opt_local.suffixesadd:prepend(".go")
+    vim.opt_local.includeexpr = "v:lua.require('base.gf').resolve_go(v:fname)"
+  end,
+})
+
 -- ## COMMANDS --------------------------------------------------------------
 
--- 10. Testing commands
+-- 11. Testing commands
 -- Aditional commands to the ones implemented in neotest.
 -------------------------------------------------------------------
 

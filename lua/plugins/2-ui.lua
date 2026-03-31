@@ -26,6 +26,15 @@ local is_android = vim.fn.isdirectory('/data') == 1 -- true if on android
 
 return {
 
+  -- fluidlan-theme [theme]
+  -- local theme from ~/projects/fluidlan-theme
+  {
+    dir = vim.fn.expand("~/projects/fluidlan-theme"),
+    name = "fluidlan-theme",
+    lazy = false,
+    priority = 1000,
+  },
+
   --  tokyonight [theme]
   --  https://github.com/folke/tokyonight.nvim
   {

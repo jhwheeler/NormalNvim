@@ -7,6 +7,7 @@
 --       -> alpha-nvim                  [greeter]
 --       -> nvim-notify                 [notifications]
 --       -> mini.indentscope            [guides]
+--       -> treesitter-context          [sticky context]
 --       -> heirline-components.nvim    [ui components]
 --       -> heirline                    [ui components]
 --       -> telescope                   [search]
@@ -227,6 +228,32 @@ return {
         end,
       })
     end
+  },
+
+  --  treesitter-context [sticky context]
+  --  https://github.com/nvim-treesitter/nvim-treesitter-context
+  --  Pins enclosing function/class/control-flow lines to the top of the buffer.
+  {
+    "nvim-treesitter/nvim-treesitter-context",
+    event = { "BufReadPost", "BufNewFile" },
+    opts = {
+      max_lines = 4,
+      multiline_threshold = 1,
+      trim_scope = "outer",
+      mode = "cursor",
+    },
+    config = function(_, opts)
+      require("treesitter-context").setup(opts)
+      local function apply_hl()
+        vim.api.nvim_set_hl(0, "TreesitterContext", { bg = "#34323e" })
+        vim.api.nvim_set_hl(0, "TreesitterContextLineNumber", { fg = "#b888e2", bg = "#34323e", bold = true })
+      end
+      apply_hl()
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        desc = "Reapply treesitter-context highlights after colorscheme change",
+        callback = apply_hl,
+      })
+    end,
   },
 
   -- heirline-components.nvim [ui components]

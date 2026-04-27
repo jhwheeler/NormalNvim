@@ -50,7 +50,7 @@ return {
         "~/"
       },
       silent_chdir = true,
-      manual_mode = false,
+      manual_mode = true,
 
       -- Don't chdir for certain buffers
       exclude_chdir = {

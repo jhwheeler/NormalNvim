@@ -41,7 +41,6 @@ return {
         ".hg",
         ".bzr",
         ".svn",
-        "Makefile",
         ".solution",
         ".solution.toml"
       },

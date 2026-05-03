@@ -358,6 +358,7 @@ return {
         sh = { "shfmt" },
         bash = { "shfmt" },
         zsh = { "shfmt" },
+        sql = { "pg_format" },
       },
       format_on_save = {
         timeout_ms = 5000,
@@ -366,6 +367,14 @@ return {
       formatters = {
         shfmt = {
           prepend_args = { "-i", "2" },
+        },
+        pg_format = {
+          prepend_args = {
+            "--keyword-case", "1",
+            "--type-case", "1",
+            "--function-case", "1",
+            "--spaces", "2",
+          },
         },
       },
     },

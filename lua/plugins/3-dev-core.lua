@@ -29,29 +29,17 @@ return {
   --  TREE SITTER ---------------------------------------------------------
   --  [syntax highlight]
   --  https://github.com/nvim-treesitter/nvim-treesitter
-  --  https://github.com/windwp/nvim-treesitter-textobjects
+  --  https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+  --  The `main` branch has no module system: highlight and indent are enabled
+  --  per buffer from the FileType autocmd below.
   {
     "nvim-treesitter/nvim-treesitter",
+    branch = "main",
     dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" },
     event = "User BaseDefered",
-    cmd = {
-      "TSBufDisable",
-      "TSBufEnable",
-      "TSBufToggle",
-      "TSDisable",
-      "TSEnable",
-      "TSToggle",
-      "TSInstall",
-      "TSInstallInfo",
-      "TSInstallSync",
-      "TSModuleInfo",
-      "TSUninstall",
-      "TSUpdate",
-      "TSUpdateSync",
-    },
+    cmd = { "TSInstall", "TSInstallFromGrammar", "TSUpdate", "TSUninstall", "TSLog" },
     build = ":TSUpdate",
     opts = {
-      auto_install = false, -- Currently bugged. Use [:TSInstall all] and [:TSUpdate all]
       ensure_installed = {
         "svelte",
         "typescript",
@@ -72,79 +60,119 @@ return {
         "vim",
         "vimdoc",
       },
+    },
+    config = function(_, opts)
+      local ts = require("nvim-treesitter")
+      ts.setup({})
+      ts.install(opts.ensure_installed)
 
-      highlight = {
-        enable = true,
-        disable = function(_, bufnr) return utils.is_big_file(bufnr) end,
-      },
-      matchup = {
-        enable = true,
-        enable_quotes = true,
-        disable = function(_, bufnr) return utils.is_big_file(bufnr) end,
-      },
-      incremental_selection = { enable = true },
-      indent = { enable = true },
-      textobjects = {
-        select = {
-          enable = true,
-          lookahead = true,
-          keymaps = {
-            ["ak"] = { query = "@block.outer", desc = "around block" },
-            ["ik"] = { query = "@block.inner", desc = "inside block" },
-            ["ac"] = { query = "@class.outer", desc = "around class" },
-            ["ic"] = { query = "@class.inner", desc = "inside class" },
-            ["a?"] = { query = "@conditional.outer", desc = "around conditional" },
-            ["i?"] = { query = "@conditional.inner", desc = "inside conditional" },
-            ["af"] = { query = "@function.outer", desc = "around function " },
-            ["if"] = { query = "@function.inner", desc = "inside function " },
-            ["al"] = { query = "@loop.outer", desc = "around loop" },
-            ["il"] = { query = "@loop.inner", desc = "inside loop" },
-            ["aa"] = { query = "@parameter.outer", desc = "around argument" },
-            ["ia"] = { query = "@parameter.inner", desc = "inside argument" },
-          },
+      local function attach(bufnr)
+        if utils.is_big_file(bufnr) then return end
+        local lang = vim.treesitter.language.get_lang(vim.bo[bufnr].filetype)
+        if not lang or not vim.treesitter.language.add(lang) then return end
+        vim.treesitter.start(bufnr, lang)
+        if vim.treesitter.query.get(lang, "indents") then
+          vim.bo[bufnr].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end
+      end
+
+      vim.api.nvim_create_autocmd("FileType", {
+        group = vim.api.nvim_create_augroup("base_treesitter", { clear = true }),
+        desc = "Enable treesitter highlight and indent",
+        callback = function(args) attach(args.buf) end,
+      })
+      -- This plugin is lazy-loaded, so buffers opened before it need attaching too.
+      for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+        if vim.api.nvim_buf_is_loaded(bufnr) and vim.bo[bufnr].filetype ~= "" then
+          attach(bufnr)
+        end
+      end
+    end,
+  },
+
+  --  nvim-treesitter-textobjects [treesitter text objects]
+  --  https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+  {
+    "nvim-treesitter/nvim-treesitter-textobjects",
+    branch = "main",
+    opts = {
+      select = {
+        lookahead = true,
+        keymaps = {
+          ["ak"] = { query = "@block.outer", desc = "around block" },
+          ["ik"] = { query = "@block.inner", desc = "inside block" },
+          ["ac"] = { query = "@class.outer", desc = "around class" },
+          ["ic"] = { query = "@class.inner", desc = "inside class" },
+          ["a?"] = { query = "@conditional.outer", desc = "around conditional" },
+          ["i?"] = { query = "@conditional.inner", desc = "inside conditional" },
+          ["af"] = { query = "@function.outer", desc = "around function " },
+          ["if"] = { query = "@function.inner", desc = "inside function " },
+          ["al"] = { query = "@loop.outer", desc = "around loop" },
+          ["il"] = { query = "@loop.inner", desc = "inside loop" },
+          ["aa"] = { query = "@parameter.outer", desc = "around argument" },
+          ["ia"] = { query = "@parameter.inner", desc = "inside argument" },
         },
-        move = {
-          enable = true,
-          set_jumps = true,
-          goto_next_start = {
-            ["]k"] = { query = "@block.outer", desc = "Next block start" },
-            ["]f"] = { query = "@function.outer", desc = "Next function start" },
-            ["]a"] = { query = "@parameter.inner", desc = "Next parameter start" },
-          },
-          goto_next_end = {
-            ["]K"] = { query = "@block.outer", desc = "Next block end" },
-            ["]F"] = { query = "@function.outer", desc = "Next function end" },
-            ["]A"] = { query = "@parameter.inner", desc = "Next parameter end" },
-          },
-          goto_previous_start = {
-            ["[k"] = { query = "@block.outer", desc = "Previous block start" },
-            ["[f"] = { query = "@function.outer", desc = "Previous function start" },
-            ["[a"] = { query = "@parameter.inner", desc = "Previous parameter start" },
-          },
-          goto_previous_end = {
-            ["[K"] = { query = "@block.outer", desc = "Previous block end" },
-            ["[F"] = { query = "@function.outer", desc = "Previous function end" },
-            ["[A"] = { query = "@parameter.inner", desc = "Previous parameter end" },
-          },
+      },
+      move = {
+        set_jumps = true,
+        goto_next_start = {
+          ["]k"] = { query = "@block.outer", desc = "Next block start" },
+          ["]f"] = { query = "@function.outer", desc = "Next function start" },
+          ["]a"] = { query = "@parameter.inner", desc = "Next parameter start" },
         },
-        swap = {
-          enable = true,
-          swap_next = {
-            [">K"] = { query = "@block.outer", desc = "Swap next block" },
-            [">F"] = { query = "@function.outer", desc = "Swap next function" },
-            [">A"] = { query = "@parameter.inner", desc = "Swap next parameter" },
-          },
-          swap_previous = {
-            ["<K"] = { query = "@block.outer", desc = "Swap previous block" },
-            ["<F"] = { query = "@function.outer", desc = "Swap previous function" },
-            ["<A"] = { query = "@parameter.inner", desc = "Swap previous parameter" },
-          },
+        goto_next_end = {
+          ["]K"] = { query = "@block.outer", desc = "Next block end" },
+          ["]F"] = { query = "@function.outer", desc = "Next function end" },
+          ["]A"] = { query = "@parameter.inner", desc = "Next parameter end" },
+        },
+        goto_previous_start = {
+          ["[k"] = { query = "@block.outer", desc = "Previous block start" },
+          ["[f"] = { query = "@function.outer", desc = "Previous function start" },
+          ["[a"] = { query = "@parameter.inner", desc = "Previous parameter start" },
+        },
+        goto_previous_end = {
+          ["[K"] = { query = "@block.outer", desc = "Previous block end" },
+          ["[F"] = { query = "@function.outer", desc = "Previous function end" },
+          ["[A"] = { query = "@parameter.inner", desc = "Previous parameter end" },
+        },
+      },
+      swap = {
+        swap_next = {
+          [">K"] = { query = "@block.outer", desc = "Swap next block" },
+          [">F"] = { query = "@function.outer", desc = "Swap next function" },
+          [">A"] = { query = "@parameter.inner", desc = "Swap next parameter" },
+        },
+        swap_previous = {
+          ["<K"] = { query = "@block.outer", desc = "Swap previous block" },
+          ["<F"] = { query = "@function.outer", desc = "Swap previous function" },
+          ["<A"] = { query = "@parameter.inner", desc = "Swap previous parameter" },
         },
       },
     },
     config = function(_, opts)
-      -- calling setup() here is necessary to enable conceal and some features.
-      require("nvim-treesitter.configs").setup(opts)
+      require("nvim-treesitter-textobjects").setup({
+        select = { lookahead = opts.select.lookahead },
+        move = { set_jumps = opts.move.set_jumps },
+      })
+      for key, map in pairs(opts.select.keymaps) do
+        vim.keymap.set({ "x", "o" }, key, function()
+          require("nvim-treesitter-textobjects.select").select_textobject(map.query, "textobjects")
+        end, { desc = map.desc })
+      end
+      for _, fn in ipairs({ "goto_next_start", "goto_next_end", "goto_previous_start", "goto_previous_end" }) do
+        for key, map in pairs(opts.move[fn]) do
+          vim.keymap.set({ "n", "x", "o" }, key, function()
+            require("nvim-treesitter-textobjects.move")[fn](map.query, "textobjects")
+          end, { desc = map.desc })
+        end
+      end
+      for _, fn in ipairs({ "swap_next", "swap_previous" }) do
+        for key, map in pairs(opts.swap[fn]) do
+          vim.keymap.set("n", key, function()
+            require("nvim-treesitter-textobjects.swap")[fn](map.query)
+          end, { desc = map.desc })
+        end
+      end
     end,
   },
 

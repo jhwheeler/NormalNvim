@@ -528,6 +528,7 @@ return {
     config = function()
       vim.g.matchup_matchparen_deferred = 1   -- work async
       vim.g.matchup_matchparen_offscreen = {} -- disable status bar icon
+      vim.g.matchup_treesitter_enable_quotes = true
     end,
   },
 

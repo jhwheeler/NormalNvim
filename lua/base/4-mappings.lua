@@ -195,7 +195,7 @@ end
 -- treesitter
 if is_available("nvim-treesitter") then
   maps.n["<leader>pT"] = { "<cmd>TSUpdate<cr>", desc = "Treesitter update" }
-  maps.n["<leader>pt"] = { "<cmd>TSInstallInfo<cr>", desc = "Treesitter open" }
+  maps.n["<leader>pt"] = { "<cmd>checkhealth nvim-treesitter<cr>", desc = "Treesitter info" }
 end
 
 -- nvim updater
